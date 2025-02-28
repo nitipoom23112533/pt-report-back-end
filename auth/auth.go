@@ -9,6 +9,7 @@ import (
 
 const jwtKey = "BdKPSNo7zxXR3P1h85klTMFWiaKP5KzbHO9A9bKcBAZ3xvknKAbYPmsrtaffFtJu"
 
+
 type JWTCustomClaims struct {
 	UID       string `json:"uid"`
 	Email     string `json:"email"`
@@ -18,8 +19,8 @@ type JWTCustomClaims struct {
 	jwt.StandardClaims
 }
 
-type Auth struct {
-}
+// type Auth struct {
+// }
 
 func GetJwtKey() []byte {
 	return []byte(jwtKey)

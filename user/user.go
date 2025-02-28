@@ -3,6 +3,9 @@ package user
 import (
 	"pt-report-backend/db"
 	"fmt"
+	"github.com/golang-jwt/jwt/v4" // ✅ Correct package
+
+
 )
 
 type User struct {
@@ -18,8 +21,28 @@ type Role struct {
 	UID  string `db:"uid" json:"uid"`
 	Role string `db:"role" json:"role"`
 }
+// JWTCustomClaims struct
+type JWTCustomClaims struct {
+	UID       string `json:"uid"`
+	Email     string `json:"email"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Position  string `json:"position"`
+	IsAdmin   bool   `json:"isAdmin"`
+	jwt.StandardClaims
+}
 
 const userColumns = "uid, email, password, firstname, lastname"
+// const (
+// 	jwtKey            = "BdKPSNo7zxXR3P1h85klTMFWiaKP5KzbHO9A9bKcBAZ3xvknKAbYPmsrtaffFtJu"
+// 	resetPwdJWTSecret = "TfleG7uvyzqXUOYu00Rzsnk87X49rvLyabTRacG8jtD58LeBc8e7y5gEjp7k48ku"
+// )
+const jwtKey = "BdKPSNo7zxXR3P1h85klTMFWiaKP5KzbHO9A9bKcBAZ3xvknKAbYPmsrtaffFtJu"
+
+
+func GetJWTKey() []byte {
+	return []byte(jwtKey)
+}
 
 func getUsers() ([]User, error) {
 	query := fmt.Sprintf(`SELECT %s

@@ -69,12 +69,44 @@ func (s *Service) VerifyToken(tokenString string) (*JWTCustomClaims, error) {
 }
 
 
-// VerifyTokenHandler สำหรับตรวจสอบ Token
-func VerifyTokenHandler(c echo.Context) error {
-	tokenString := c.QueryParam("token") // ดึง Token จาก Query Param
+// // VerifyTokenHandler สำหรับตรวจสอบ Token
+// func VerifyTokenHandler(c echo.Context) error {
+// 	tokenString := c.QueryParam("token") // ดึง Token จาก Query Param
 
+// 	if tokenString == "" {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Token is required"})
+// 	}
+
+// 	// แปลง token
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		return GetJwtKey(), nil
+// 	})
+
+// 	if err != nil || !token.Valid {
+// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token"})
+// 	}
+
+// 	// ดึง Claims
+// 	claims, ok := token.Claims.(jwt.MapClaims)
+// 	if !ok {
+// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token claims"})
+// 	}
+
+// 	// ส่งข้อมูลผู้ใช้กลับไป
+// 	return c.JSON(http.StatusOK, claims)
+// }
+
+func VerifyTokenHandler(c echo.Context) error {
+	tokenString := c.Request().Header.Get("Authorization") // ดึง Token จาก Header: Authorization
+
+	// ตรวจสอบว่า Token มีหรือไม่
 	if tokenString == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Token is required"})
+	}
+
+	// ถ้ามี Bearer token ก็ให้ตัดคำว่า "Bearer " ออก
+	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
+		tokenString = tokenString[7:]
 	}
 
 	// แปลง token

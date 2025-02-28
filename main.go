@@ -29,6 +29,8 @@ func main() {
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
 	// ตัวอย่าง Route
+	// e.Use(auth.Auth()) // ใช้งาน JWT Middleware
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Backend with Echo!")
 	})
@@ -63,7 +65,7 @@ func main() {
 			"occupation": occupationCount,
 			"wallet_type": walletTypeCount,
 		})
-	})
+	},auth.Auth())
 
 	e.GET("/transaction",func(c echo.Context) error {
 
@@ -95,10 +97,9 @@ func main() {
 			"occupation": occupationCount,
 			"wallet_type": walletTypeCount,
 		})
-	})
+	},auth.Auth())
 
 	e.GET("/login", auth.VerifyTokenHandler)
-
 	// เริ่มเซิร์ฟเวอร์
 	e.Logger.Fatal(e.Start(":8080"))
 }
