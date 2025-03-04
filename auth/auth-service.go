@@ -61,41 +61,12 @@ func (s *Service) VerifyToken(tokenString string) (*JWTCustomClaims, error) {
 	}
 
 	// ตรวจสอบว่า Token หมดอายุหรือไม่
-	if claims.ExpiresAt < time.Now().Unix() {
+	if claims.ExpiresAt.Unix() < time.Now().Unix() {
 		return nil, errors.New("token expired")
 	}
 
 	return claims, nil
 }
-
-
-// // VerifyTokenHandler สำหรับตรวจสอบ Token
-// func VerifyTokenHandler(c echo.Context) error {
-// 	tokenString := c.QueryParam("token") // ดึง Token จาก Query Param
-
-// 	if tokenString == "" {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Token is required"})
-// 	}
-
-// 	// แปลง token
-// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-// 		return GetJwtKey(), nil
-// 	})
-
-// 	if err != nil || !token.Valid {
-// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token"})
-// 	}
-
-// 	// ดึง Claims
-// 	claims, ok := token.Claims.(jwt.MapClaims)
-// 	if !ok {
-// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token claims"})
-// 	}
-
-// 	// ส่งข้อมูลผู้ใช้กลับไป
-// 	return c.JSON(http.StatusOK, claims)
-// }
-
 func VerifyTokenHandler(c echo.Context) error {
 	tokenString := c.Request().Header.Get("Authorization") // ดึง Token จาก Header: Authorization
 

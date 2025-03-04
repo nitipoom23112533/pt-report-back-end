@@ -7,6 +7,8 @@ import (
 	"pt-report-backend/db"
 	"pt-report-backend/invitation"
 	"pt-report-backend/transaction"
+	// "pt-report-backend/user"
+
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -28,8 +30,9 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
+
 	// ตัวอย่าง Route
-	// e.Use(auth.Auth()) // ใช้งาน JWT Middleware
+	e.Use(auth.Auth()) // ใช้งาน JWT Middleware
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Backend with Echo!")
@@ -40,7 +43,7 @@ func main() {
 		startDate := c.QueryParam("start_date")
 		endDate := c.QueryParam("end_date")
 		dateType := c.QueryParam("date_type")
-
+		
 		// ตรวจสอบว่ามีค่าหรือไม่
 		if startDate == "" || endDate == "" {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing date parameters"})
@@ -100,6 +103,7 @@ func main() {
 	},auth.Auth())
 
 	e.GET("/login", auth.VerifyTokenHandler)
+
 	// เริ่มเซิร์ฟเวอร์
 	e.Logger.Fatal(e.Start(":8080"))
 }
