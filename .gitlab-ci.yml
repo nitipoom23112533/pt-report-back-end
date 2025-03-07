@@ -9,6 +9,7 @@ deploy-prod:
     - cat $GCP_SERVICE_ACCOUNT_KEY
     - gcloud auth activate-service-account --key-file="$GCP_SERVICE_ACCOUNT_KEY"
     # - gcloud auth activate-service-account --key-file $GCP_SERVICE_ACCOUNT_KEY
+    # - gcloud auth activate-service-account --key-file $GCP_SERVICE_ACCOUNT_KEY
     - gcloud config set project pt-report
     - gcloud --quiet app deploy app.yaml
 
