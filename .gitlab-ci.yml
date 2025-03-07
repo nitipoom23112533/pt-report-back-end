@@ -4,9 +4,9 @@ deploy-prod:
   stage: deploy
   script:
 
-    - echo "Checking Service Account Key File"
-    - ls -la $GCP_SERVICE_ACCOUNT_KEY
-    - cat $GCP_SERVICE_ACCOUNT_KEY
+    # - echo "Checking Service Account Key File"
+    # - ls -la $GCP_SERVICE_ACCOUNT_KEY
+    # - cat $GCP_SERVICE_ACCOUNT_KEY
     - gcloud auth activate-service-account --key-file="$GCP_SERVICE_ACCOUNT_KEY"
     # - gcloud auth activate-service-account --key-file $GCP_SERVICE_ACCOUNT_KEY
     # - gcloud auth activate-service-account --key-file $GCP_SERVICE_ACCOUNT_KEY
