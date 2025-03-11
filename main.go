@@ -17,8 +17,8 @@ import (
 func main() {
 
 	err := db.InitDB(db.Config{
-		Username:     "niti",
-		Password:     "VO/tguyYm(HIKl0n",
+		Username:     "pt-report",
+		Password:     "6EuFmuTj3d83hgQ/",
 		Server:       "35.186.157.84",
 		DatabaseName: "pt_record",
 	})
