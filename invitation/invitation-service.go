@@ -5,8 +5,14 @@ import (
 	"github.com/jmoiron/sqlx"
     "fmt"
 )
+type Service struct {
+    
+}
 
-func GetAllCustomers(db *sqlx.DB, startDate, endDate string) ([]Customer, error) {
+func NewService() *Service {
+	return &Service{}
+}
+func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string) ([]Customer, error) {
 	query := `SELECT Customer_code,
 	                MAX(Occupation) AS Occupation,
                     MAX(Customer_segment) AS Customer_segment,
@@ -25,7 +31,7 @@ func GetAllCustomers(db *sqlx.DB, startDate, endDate string) ([]Customer, error)
 
 	return customers, nil
 }
-func GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string)([]Invitation,error)  {
+func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string)([]Invitation,error)  {
     // Choose the correct date column based on dateType
     var dateColumn string
     if dateType == "invitationDate" {
@@ -45,7 +51,7 @@ func GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string)([]
     return invitation,err
 }
 
-func FilterCustomers(customers []Customer, invitations []Invitation) (CountOccupation,Wallet_type) {
+func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation) (CountOccupation,Wallet_type) {
 	var countOccupation CountOccupation
     var countWallet_type Wallet_type
 	// สร้าง map เพื่อเก็บ Customer_code -> Usage_segment

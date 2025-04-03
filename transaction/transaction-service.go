@@ -6,7 +6,16 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func GetAllTransaction(db *sqlx.DB, startDate, endDate string)([]Transaction,error)  {
+type Service struct{
+
+}
+
+func NewService() *Service {
+	return &Service{}
+}
+
+
+func (s *Service)GetAllTransaction(db *sqlx.DB, startDate, endDate string)([]Transaction,error)  {
     query := `SELECT Customer_code, Wallet_type
                             FROM pt_transaction 
                             WHERE T_date BETWEEN ? AND ?;`
@@ -19,7 +28,7 @@ func GetAllTransaction(db *sqlx.DB, startDate, endDate string)([]Transaction,err
     return transaction,err
 }
 
-func FilterCustomers(customers []invitation.Customer, transaction []Transaction) (invitation.CountOccupation,invitation.Wallet_type) {
+func (s *Service)FilterCustomers(customers []invitation.Customer, transaction []Transaction) (invitation.CountOccupation,invitation.Wallet_type) {
 	var countOccupation invitation.CountOccupation
     var countWallet_type invitation.Wallet_type
 	// สร้าง map เพื่อเก็บ Customer_code -> Usage_segment
