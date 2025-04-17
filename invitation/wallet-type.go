@@ -13,6 +13,7 @@ type Wallet_type struct{
     PT16H int `json:"PT16H"`
     PT17H int `json:"PT17H"`
     PT18H int `json:"PT18H"`
+    PT19H int `json:"PT19H"`
 
     PT01L int `json:"PT01L"`
     PT02L int `json:"PT02L"`
@@ -26,6 +27,7 @@ type Wallet_type struct{
     PT16L int `json:"PT16L"`
     PT17L int `json:"PT17L"`
     PT18L int `json:"PT18L"`
+    PT19L int `json:"PT19L"`
 
     PT01M int `json:"PT01M"`
     PT02M int `json:"PT02M"`
@@ -39,6 +41,7 @@ type Wallet_type struct{
     PT16M int `json:"PT16M"`
     PT17M int `json:"PT17M"`
     PT18M int `json:"PT18M"`
+    PT19M int `json:"PT19M"`
 
     PT01LO int `json:"PT01LO"`
     PT02LO int `json:"PT02LO"`
@@ -52,6 +55,7 @@ type Wallet_type struct{
     PT16LO int `json:"PT16LO"`
     PT17LO int `json:"PT17LO"`
     PT18LO int `json:"PT18LO"`
+    PT19LO int `json:"PT19LO"`
 
     PT01SVO int `json:"PT01SVO"`
     PT02SVO int `json:"PT02SVO"`
@@ -65,6 +69,7 @@ type Wallet_type struct{
     PT16SVO int `json:"PT16SVO"`
     PT17SVO int `json:"PT17SVO"`
     PT18SVO int `json:"PT18SVO"`
+    PT19SVO int `json:"PT19SVO"`
 
     PT01I int `json:"PT01I"`
     PT02I int `json:"PT02I"`
@@ -78,6 +83,7 @@ type Wallet_type struct{
     PT16I int `json:"PT16I"`
     PT17I int `json:"PT17I"`
     PT18I int `json:"PT18I"`
+    PT19I int `json:"PT19I"`
 
     PT01NU int `json:"PT01NU"`
     PT02NU int `json:"PT02NU"`
@@ -91,6 +97,7 @@ type Wallet_type struct{
     PT16NU int `json:"PT16NU"`
     PT17NU int `json:"PT17NU"`
     PT18NU int `json:"PT18NU"`
+    PT19NU int `json:"PT19NU"`
 
     PT01NULL int `json:"PT01NULL"`
     PT02NULL int `json:"PT02NULL"`
@@ -104,6 +111,7 @@ type Wallet_type struct{
     PT16NULL int `json:"PT16NULL"`
     PT17NULL int `json:"PT17NULL"`
     PT18NULL int `json:"PT18NULL"`
+    PT19NULL int `json:"PT19NULL"`
 
     // Gender
     PT01Male int `json:"PT01Male"`
@@ -118,7 +126,7 @@ type Wallet_type struct{
     PT16Male int `json:"PT16Male"`
     PT17Male int `json:"PT17Male"`
     PT18Male int `json:"PT18Male"`
-
+    PT19Male int `json:"PT19Male"`
 
     PT01Female int `json:"PT01Female"`
     PT02Female int `json:"PT02Female"`
@@ -132,7 +140,7 @@ type Wallet_type struct{
     PT16Female int `json:"PT16Female"`
     PT17Female int `json:"PT17Female"`
     PT18Female int `json:"PT18Female"`
-
+    PT19Female int `json:"PT19Female"`
 
     PT01GNULL int `json:"PT01GNULL"`
     PT02GNULL int `json:"PT02GNULL"`
@@ -146,6 +154,7 @@ type Wallet_type struct{
     PT16GNULL int `json:"PT16GNULL"`
     PT17GNULL int `json:"PT17GNULL"`
     PT18GNULL int `json:"PT18GNULL"`
+    PT19GNULL int `json:"PT19GNULL"`
 
 	// age range
 	PT01Age1 int `json:"PT01Age1"`
@@ -160,6 +169,7 @@ type Wallet_type struct{
     PT16Age1 int `json:"PT16Age1"`
     PT17Age1 int `json:"PT17Age1"`
     PT18Age1 int `json:"PT18Age1"`
+    PT19Age1 int `json:"PT19Age1"`
 
 	PT01Age2 int `json:"PT01Age2"`
     PT02Age2 int `json:"PT02Age2"`
@@ -173,6 +183,7 @@ type Wallet_type struct{
     PT16Age2 int `json:"PT16Age2"`
     PT17Age2 int `json:"PT17Age2"`
     PT18Age2 int `json:"PT18Age2"`
+    PT19Age2 int `json:"PT19Age2"`
 
 	PT01Age3 int `json:"PT01Age3"`
     PT02Age3 int `json:"PT02Age3"`
@@ -186,6 +197,7 @@ type Wallet_type struct{
     PT16Age3 int `json:"PT16Age3"`
     PT17Age3 int `json:"PT17Age3"`
     PT18Age3 int `json:"PT18Age3"`
+    PT19Age3 int `json:"PT19Age3"`
 
 	PT01Age4 int `json:"PT01Age4"`
     PT02Age4 int `json:"PT02Age4"`
@@ -199,6 +211,7 @@ type Wallet_type struct{
     PT16Age4 int `json:"PT16Age4"`
     PT17Age4 int `json:"PT17Age4"`
     PT18Age4 int `json:"PT18Age4"`
+    PT19Age4 int `json:"PT19Age4"`
 
 	PT01Age5 int `json:"PT01Age5"`
     PT02Age5 int `json:"PT02Age5"`
@@ -212,6 +225,7 @@ type Wallet_type struct{
     PT16Age5 int `json:"PT16Age5"`
     PT17Age5 int `json:"PT17Age5"`
     PT18Age5 int `json:"PT18Age5"`
+    PT19Age5 int `json:"PT19Age5"`
 
 	PT01Age6 int `json:"PT01Age6"`
     PT02Age6 int `json:"PT02Age6"`
@@ -225,6 +239,7 @@ type Wallet_type struct{
     PT16Age6 int `json:"PT16Age6"`
     PT17Age6 int `json:"PT17Age6"`
     PT18Age6 int `json:"PT18Age6"`
+    PT19Age6 int `json:"PT19Age6"`
 
 	PT01Age7 int `json:"PT01Age7"`
     PT02Age7 int `json:"PT02Age7"`
@@ -238,6 +253,7 @@ type Wallet_type struct{
     PT16Age7 int `json:"PT16Age7"`
     PT17Age7 int `json:"PT17Age7"`
     PT18Age7 int `json:"PT18Age7"`
+    PT19Age7 int `json:"PT19Age7"`
 
 	PT01Age8 int `json:"PT01Age8"`
     PT02Age8 int `json:"PT02Age8"`
@@ -251,6 +267,7 @@ type Wallet_type struct{
     PT16Age8 int `json:"PT16Age8"`
     PT17Age8 int `json:"PT17Age8"`
     PT18Age8 int `json:"PT18Age8"`
+    PT19Age8 int `json:"PT19Age8"`
 
 	PT01AgeNULL int `json:"PT01AgeNULL"`
     PT02AgeNULL int `json:"PT02AgeNULL"`
@@ -264,6 +281,7 @@ type Wallet_type struct{
     PT16AgeNULL int `json:"PT16AgeNULL"`
     PT17AgeNULL int `json:"PT17AgeNULL"`
     PT18AgeNULL int `json:"PT18AgeNULL"`
+    PT19AgeNULL int `json:"PT19AgeNULL"`
 
     // Customer Segment
     PT01CS02 int `json:"PT01CS02"`
@@ -278,6 +296,7 @@ type Wallet_type struct{
     PT16CS02 int `json:"PT16CS02"`
     PT17CS02 int `json:"PT17CS02"`
     PT18CS02 int `json:"PT18CS02"`
+    PT19CS02 int `json:"PT19CS02"`
 
     PT01CS03 int `json:"PT01CS03"`
     PT02CS03 int `json:"PT02CS03"`
@@ -291,6 +310,7 @@ type Wallet_type struct{
     PT16CS03 int `json:"PT16CS03"`
     PT17CS03 int `json:"PT17CS03"`
     PT18CS03 int `json:"PT18CS03"`
+    PT19CS03 int `json:"PT19CS03"`
 
     PT01CS04 int `json:"PT01CS04"`
     PT02CS04 int `json:"PT02CS04"`
@@ -304,6 +324,7 @@ type Wallet_type struct{
     PT16CS04 int `json:"PT16CS04"`
     PT17CS04 int `json:"PT17CS04"`
     PT18CS04 int `json:"PT18CS04"`
+    PT19CS04 int `json:"PT19CS04"`
 
     PT01CS05 int `json:"PT01CS05"`
     PT02CS05 int `json:"PT02CS05"`
@@ -317,6 +338,7 @@ type Wallet_type struct{
     PT16CS05 int `json:"PT16CS05"`
     PT17CS05 int `json:"PT17CS05"`
     PT18CS05 int `json:"PT18CS05"`
+    PT19CS05 int `json:"PT19CS05"`
 
     PT01CS06 int `json:"PT01CS06"`
     PT02CS06 int `json:"PT02CS06"`
@@ -330,6 +352,7 @@ type Wallet_type struct{
     PT16CS06 int `json:"PT16CS06"`
     PT17CS06 int `json:"PT17CS06"`
     PT18CS06 int `json:"PT18CS06"`
+    PT19CS06 int `json:"PT19CS06"`
 
     PT01CS07 int `json:"PT01CS07"`
     PT02CS07 int `json:"PT02CS07"`
@@ -343,6 +366,7 @@ type Wallet_type struct{
     PT16CS07 int `json:"PT16CS07"`
     PT17CS07 int `json:"PT17CS07"`
     PT18CS07 int `json:"PT18CS07"`
+    PT19CS07 int `json:"PT19CS07"`
 
     PT01CS08 int `json:"PT01CS08"`
     PT02CS08 int `json:"PT02CS08"`
@@ -356,6 +380,7 @@ type Wallet_type struct{
     PT16CS08 int `json:"PT16CS08"`
     PT17CS08 int `json:"PT17CS08"`
     PT18CS08 int `json:"PT18CS08"`
+    PT19CS08 int `json:"PT19CS08"`
 
     PT01CS09 int `json:"PT01CS09"`
     PT02CS09 int `json:"PT02CS09"`
@@ -369,6 +394,7 @@ type Wallet_type struct{
     PT16CS09 int `json:"PT16CS09"`
     PT17CS09 int `json:"PT17CS09"`
     PT18CS09 int `json:"PT18CS09"`
+    PT19CS09 int `json:"PT19CS09"`
 
     PT01CS10 int `json:"PT01CS10"`
     PT02CS10 int `json:"PT02CS10"`
@@ -382,6 +408,7 @@ type Wallet_type struct{
     PT16CS10 int `json:"PT16CS10"`
     PT17CS10 int `json:"PT17CS10"`
     PT18CS10 int `json:"PT18CS10"`
+    PT19CS10 int `json:"PT19CS10"`
 
     PT01CS11 int `json:"PT01CS11"`
     PT02CS11 int `json:"PT02CS11"`
@@ -395,6 +422,7 @@ type Wallet_type struct{
     PT16CS11 int `json:"PT16CS11"`
     PT17CS11 int `json:"PT17CS11"`
     PT18CS11 int `json:"PT18CS11"`
+    PT19CS11 int `json:"PT19CS11"`
 
     PT01CS12 int `json:"PT01CS12"`
     PT02CS12 int `json:"PT02CS12"`
@@ -408,6 +436,7 @@ type Wallet_type struct{
     PT16CS12 int `json:"PT16CS12"`
     PT17CS12 int `json:"PT17CS12"`
     PT18CS12 int `json:"PT18CS12"`
+    PT19CS12 int `json:"PT19CS12"`
 
     PT01CS13 int `json:"PT01CS13"`
     PT02CS13 int `json:"PT02CS13"`
@@ -421,6 +450,7 @@ type Wallet_type struct{
     PT16CS13 int `json:"PT16CS13"`
     PT17CS13 int `json:"PT17CS13"`
     PT18CS13 int `json:"PT18CS13"`
+    PT19CS13 int `json:"PT19CS13"`
 
     PT01CS14 int `json:"PT01CS14"`
     PT02CS14 int `json:"PT02CS14"`
@@ -434,6 +464,7 @@ type Wallet_type struct{
     PT16CS14 int `json:"PT16CS14"`
     PT17CS14 int `json:"PT17CS14"`
     PT18CS14 int `json:"PT18CS14"`
+    PT19CS14 int `json:"PT19CS14"`
 
     PT01CS18 int `json:"PT01CS18"`
     PT02CS18 int `json:"PT02CS18"`
@@ -447,6 +478,7 @@ type Wallet_type struct{
     PT16CS18 int `json:"PT16CS18"`
     PT17CS18 int `json:"PT17CS18"`
     PT18CS18 int `json:"PT18CS18"`
+    PT19CS18 int `json:"PT19CS18"`
 
     PT01CS99 int `json:"PT01CS99"`
     PT02CS99 int `json:"PT02CS99"`
@@ -460,6 +492,7 @@ type Wallet_type struct{
     PT16CS99 int `json:"PT16CS99"`
     PT17CS99 int `json:"PT17CS99"`
     PT18CS99 int `json:"PT18CS99"`
+    PT19CS99 int `json:"PT19CS99"`
 
     PT01CSNULL int `json:"PT01CSNULL"`
     PT02CSNULL int `json:"PT02CSNULL"`
@@ -473,6 +506,7 @@ type Wallet_type struct{
     PT16CSNULL int `json:"PT16CSNULL"`
     PT17CSNULL int `json:"PT17CSNULL"`
     PT18CSNULL int `json:"PT18CSNULL"`
+    PT19CSNULL int `json:"PT19CSNULL"`
 
 // Occupation
     PT01GOV int `json:"PT01GOV"`
@@ -487,6 +521,7 @@ type Wallet_type struct{
     PT16GOV int `json:"PT16GOV"`
     PT17GOV int `json:"PT17GOV"`
     PT18GOV int `json:"PT18GOV"`
+    PT19GOV int `json:"PT19GOV"`
 
     PT01Mass int `json:"PT01Mass"`
     PT02Mass int `json:"PT02Mass"`
@@ -500,6 +535,7 @@ type Wallet_type struct{
     PT16Mass int `json:"PT16Mass"`
     PT17Mass int `json:"PT17Mass"`
     PT18Mass int `json:"PT18Mass"`
+    PT19Mass int `json:"PT19Mass"`
 
     PT01NA int `json:"PT01NA"`
     PT02NA int `json:"PT02NA"`
@@ -513,6 +549,7 @@ type Wallet_type struct{
     PT16NA int `json:"PT16NA"`
     PT17NA int `json:"PT17NA"`
     PT18NA int `json:"PT18NA"`
+    PT19NA int `json:"PT19NA"`
 
     PT01Salary int `json:"PT01Salary"`
     PT02Salary int `json:"PT02Salary"`
@@ -526,6 +563,7 @@ type Wallet_type struct{
     PT16Salary int `json:"PT16Salary"`
     PT17Salary int `json:"PT17Salary"`
     PT18Salary int `json:"PT18Salary"`
+    PT19Salary int `json:"PT19Salary"`
 
     PT01SE int `json:"PT01SE"`
     PT02SE int `json:"PT02SE"`
@@ -539,6 +577,7 @@ type Wallet_type struct{
     PT16SE int `json:"PT16SE"`
     PT17SE int `json:"PT17SE"`
     PT18SE int `json:"PT18SE"`
+    PT19SE int `json:"PT19SE"`
 
     PT01STD int `json:"PT01STD"`
     PT02STD int `json:"PT02STD"`
@@ -552,6 +591,7 @@ type Wallet_type struct{
     PT16STD int `json:"PT16STD"`
     PT17STD int `json:"PT17STD"`
     PT18STD int `json:"PT18STD"`
+    PT19STD int `json:"PT19STD"`
 
     PT01Wealth int `json:"PT01Wealth"`
     PT02Wealth int `json:"PT02Wealth"`
@@ -565,6 +605,7 @@ type Wallet_type struct{
     PT16Wealth int `json:"PT16Wealth"`
     PT17Wealth int `json:"PT17Wealth"`
     PT18Wealth int `json:"PT18Wealth"`
+    PT19Wealth int `json:"PT19Wealth"`
 
     PT01Welfare int `json:"PT01Welfare"`
     PT02Welfare int `json:"PT02Welfare"`
@@ -578,6 +619,7 @@ type Wallet_type struct{
     PT16Welfare int `json:"PT16Welfare"`
     PT17Welfare int `json:"PT17Welfare"`
     PT18Welfare int `json:"PT18Welfare"`
+    PT19Welfare int `json:"PT19Welfare"`
 
     PT01OCNULL int `json:"PT01OCNULL"`
     PT02OCNULL int `json:"PT02OCNULL"`
@@ -591,5 +633,6 @@ type Wallet_type struct{
     PT16OCNULL int `json:"PT16OCNULL"`
     PT17OCNULL int `json:"PT17OCNULL"`
     PT18OCNULL int `json:"PT18OCNULL"`
+    PT19OCNULL int `json:"PT19OCNULL"`
 
 }
