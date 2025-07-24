@@ -31,7 +31,7 @@ func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string) ([]Cust
 
 	return customers, nil
 }
-func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string)([]Invitation,error)  {
+func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string,selected1InvPProfile string)([]Invitation,error)  {
     // Choose the correct date column based on dateType
     var dateColumn string
     if dateType == "invitationDate" {
@@ -39,9 +39,19 @@ func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateTyp
     } else {
        dateColumn = "T_date"
     }
-    query := fmt.Sprintf(`SELECT EDR_id, Wallet_type
+    var grpb string
+    var Wallet_type string
+    if selected1InvPProfile == "1" {
+        grpb = "GROUP BY EDR_id"
+        Wallet_type = "MAX(Wallet_type) as Wallet_type"
+    }else{
+        grpb = ""
+        Wallet_type = "Wallet_type"
+    }
+    query := fmt.Sprintf(`SELECT EDR_id, %s
                             FROM pt_invitation 
-                            WHERE %s BETWEEN ? AND ?`, dateColumn)
+                            WHERE %s BETWEEN ? AND ?
+                            %s`, Wallet_type,dateColumn,grpb)
     var invitation []Invitation
     err := db.Select(&invitation,query, startDate, endDate)
     if err != nil {

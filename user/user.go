@@ -33,10 +33,6 @@ type JWTCustomClaims struct {
 }
 
 const userColumns = "uid, email, password, firstname, lastname"
-// const (
-// 	jwtKey            = "BdKPSNo7zxXR3P1h85klTMFWiaKP5KzbHO9A9bKcBAZ3xvknKAbYPmsrtaffFtJu"
-// 	resetPwdJWTSecret = "TfleG7uvyzqXUOYu00Rzsnk87X49rvLyabTRacG8jtD58LeBc8e7y5gEjp7k48ku"
-// )
 const jwtKey = "BdKPSNo7zxXR3P1h85klTMFWiaKP5KzbHO9A9bKcBAZ3xvknKAbYPmsrtaffFtJu"
 
 

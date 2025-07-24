@@ -23,6 +23,7 @@ func (r *InvitationRoute) sendinvitation(c echo.Context) error {
 	startDate := c.QueryParam("start_date")
 	endDate := c.QueryParam("end_date")
 	dateType := c.QueryParam("date_type")
+	selected1InvPProfile := c.QueryParam("selected1InvPProfile")
 
 	// ตรวจสอบว่ามีค่าหรือไม่
 	if startDate == "" || endDate == "" {
@@ -35,7 +36,7 @@ func (r *InvitationRoute) sendinvitation(c echo.Context) error {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 
 	}
-	invitations, err := r.InvitationService.GetAllInvitation(db.DB, startDate, endDate, dateType)
+	invitations, err := r.InvitationService.GetAllInvitation(db.DB, startDate, endDate, dateType,selected1InvPProfile)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})

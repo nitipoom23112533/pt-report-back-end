@@ -30,7 +30,6 @@ func NewAPI() *API {
 }
 
 func (api *API) Group(g *echo.Group)  {
-	// api.InvitationRoute.Group(g.Group("pt-report"))
 	ptReportGroup := g.Group("pt-report")
 	api.InvitationRoute.Group(ptReportGroup)
 	api.TransactionRoute.Group(ptReportGroup)

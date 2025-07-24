@@ -2,7 +2,6 @@ package user
 
 type Service struct {
 	*baseService
-	// Auth *Auth
 }
 
 type baseService struct {
@@ -10,8 +9,6 @@ type baseService struct {
 
 func NewService() *Service {
 	return &Service{
-		// baseService: &baseService{},
-		// Auth: &Auth{},
 	}
 }
 

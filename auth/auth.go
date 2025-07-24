@@ -4,7 +4,6 @@ import (
 	"pt-report-backend/user"
 	"time"
 
-	// "github.com/golang-jwt/jwt"
 	"github.com/golang-jwt/jwt/v5"
 
 )
@@ -18,15 +17,12 @@ type JWTCustomClaims struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 	IsAdmin   bool   `json:"isAdmin"`
-	// jwt.StandardClaims
 	jwt.RegisteredClaims
 
 }
 func (c *JWTCustomClaims) Valid() error {
 	return nil
 }
-// type Auth struct {
-// }
 
 func GetJwtKey() []byte {
 	return []byte(jwtKey)
@@ -43,7 +39,6 @@ func (s *Service) generateToken(x *user.User) (string, error) {
 		Firstname: x.Firstname,
 		Lastname:  x.Lastname,
 		RegisteredClaims: jwt.RegisteredClaims{
-			// ExpiresAt: time.Now().Add((time.Hour * 24) * 30).Unix(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add((time.Hour * 24) * 30)), // แปลงค่าเวลาเป็น NumericDate
 		},
 	}
