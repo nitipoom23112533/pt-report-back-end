@@ -24,13 +24,15 @@ func (r *InvitationRoute) sendinvitation(c echo.Context) error {
 	endDate := c.QueryParam("end_date")
 	dateType := c.QueryParam("date_type")
 	selected1InvPProfile := c.QueryParam("selected1InvPProfile")
+	selectedAllProfile := c.QueryParam("selectedAllProfile")
+
 
 	// ตรวจสอบว่ามีค่าหรือไม่
 	if startDate == "" || endDate == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing date parameters"})
 	}
 
-	customer, err := r.InvitationService.GetAllCustomers(db.DB, startDate, endDate)
+	customer, err := r.InvitationService.GetAllCustomers(db.DB, startDate, endDate,selectedAllProfile)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
