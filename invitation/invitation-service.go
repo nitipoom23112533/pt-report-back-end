@@ -12,8 +12,26 @@ type Service struct {
 func NewService() *Service {
 	return &Service{}
 }
-func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string) ([]Customer, error) {
-	query := `SELECT Customer_code,
+func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
+    
+    var customers []Customer
+    if selectedAllProfile == "1" {
+        query := `SELECT Customer_code,
+	                MAX(Occupation) AS Occupation,
+                    MAX(Customer_segment) AS Customer_segment,
+                    MAX(Usage_segment) AS Usage_segment,
+                    MAX(Age_range) AS Age_range,
+                    MAX(Gender) AS Gender
+	            FROM pt_customer
+	            GROUP BY Customer_code;` // ดึงข้อมูลทั้งหมด
+                
+        err := db.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
+        if err != nil {
+            log.Printf("Error fetching customers: %v", err)
+            return nil, err
+        }
+    }else{
+        query := `SELECT Customer_code,
 	                MAX(Occupation) AS Occupation,
                     MAX(Customer_segment) AS Customer_segment,
                     MAX(Usage_segment) AS Usage_segment,
@@ -22,13 +40,12 @@ func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string) ([]Cust
 	            FROM pt_customer where Customer_date between ? and ?
 	            GROUP BY Customer_code;` // ดึงข้อมูลทั้งหมด
 
-	var customers []Customer
-	err := db.Select(&customers, query, startDate, endDate) // ดึงข้อมูลทั้งหมดใส่ slice
-	if err != nil {
-		log.Printf("Error fetching customers: %v", err)
-		return nil, err
-	}
-
+        err := db.Select(&customers, query, startDate, endDate) // ดึงข้อมูลทั้งหมดใส่ slice
+        if err != nil {
+            log.Printf("Error fetching customers: %v", err)
+            return nil, err
+        }
+    }
 	return customers, nil
 }
 func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string,selected1InvPProfile string)([]Invitation,error)  {

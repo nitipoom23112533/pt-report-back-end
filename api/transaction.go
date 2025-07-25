@@ -25,13 +25,14 @@ func (r *TransactionRoute)sendTransaction(c echo.Context) error {
 	// รับ start_date และ end_date จาก Query Parameters
 	startDate := c.QueryParam("start_date")
 	endDate := c.QueryParam("end_date")
+	selectedAllProfile := c.QueryParam("selectedAllProfile")
 
 	// ตรวจสอบว่ามีค่าหรือไม่
 	if startDate == "" || endDate == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing date parameters"})
 	}
 	
-	customer, err := r.InvitationService.GetAllCustomers(db.DB, startDate, endDate)
+	customer, err := r.InvitationService.GetAllCustomers(db.DB, startDate, endDate,selectedAllProfile)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 
