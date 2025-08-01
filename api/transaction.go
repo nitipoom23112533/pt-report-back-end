@@ -31,16 +31,16 @@ func (r *TransactionRoute)sendTransaction(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing date parameters"})
 	}
 	
-	// customer, err := r.InvitationService.GetAllCustomers(db.DB, startDate, endDate,selectedAllProfile)
-	customer, err := r.InvitationService.GetCachedCustomers(startDate, endDate,selectedAllProfile)
+	customer, err := r.InvitationService.GetAllCustomers(startDate, endDate,selectedAllProfile)
+	// customer, err := r.InvitationService.GetCachedCustomers(startDate, endDate,selectedAllProfile)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 
 	}
 
 	// ดึงข้อมูล transaction
-	// transactions, err := r.TransactionService.GetAllTransaction(db.DB, startDate, endDate)
-	transactions, err := r.TransactionService.GetCachedTransactions(startDate, endDate)
+	transactions, err := r.TransactionService.GetAllTransaction(startDate, endDate)
+	// transactions, err := r.TransactionService.GetCachedTransactions(startDate, endDate)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})

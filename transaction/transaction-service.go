@@ -3,7 +3,6 @@ package transaction
 import (
 	"pt-report-backend/invitation"
 	"log"
-	"github.com/jmoiron/sqlx"
     "pt-report-backend/db"
     "sync"
     "time"
@@ -21,12 +20,12 @@ func NewService() *Service {
 }
 
 
-func (s *Service)GetAllTransaction(db *sqlx.DB, startDate, endDate string)([]Transaction,error)  {
+func (s *Service)GetAllTransaction(startDate, endDate string)([]Transaction,error)  {
     query := `SELECT Customer_code, Wallet_type
                             FROM pt_transaction 
                             WHERE T_date BETWEEN ? AND ?;`
     var transaction []Transaction
-    err := db.Select(&transaction,query, startDate, endDate)
+    err := db.DB.Select(&transaction,query, startDate, endDate)
     if err != nil {
         log.Printf("Error fetching invitation: %v", err)
 		return nil, err

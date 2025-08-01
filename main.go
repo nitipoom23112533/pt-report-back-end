@@ -6,11 +6,8 @@ import (
 	"pt-report-backend/db"
 	"pt-report-backend/invitation"
 	"pt-report-backend/transaction"
-
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"time"
 	"net/http"
 )
 
@@ -30,46 +27,40 @@ func main() {
 	invitationService := invitation.NewService()
 	transactionService := transaction.NewService()
 
-	datedu,err := invitationService.GetDuration()
-	if err != nil {
-		log.Printf("Preload failed: %v", err)
-	}
-	// startDate := "2025-01-01"
-	startDate := datedu.Start_date.Format("2006-01-02")
-	endDate := time.Now().Format("2006-01-02")
+	// datedu,err := invitationService.GetDuration()
+	// if err != nil {
+	// 	log.Printf("Preload failed: %v", err)
+	// }
+	// // startDate := "2025-01-01"
+	// startDate := datedu.Start_date.Format("2006-01-02")
+	// endDate := time.Now().Format("2006-01-02")
 
-	go func() {
-		_,err = transactionService.PreloadTransactionCache(startDate,endDate)
-		if err != nil {
-			log.Printf("Preload transactions failed: %v", err)
-		}
+	// go func() {
+	// 	_,err = transactionService.PreloadTransactionCache(startDate,endDate)
+	// 	if err != nil {
+	// 		log.Printf("Preload transactions failed: %v", err)
+	// 	}
 
-		_, err = invitationService.PreloadInvitationsCache(startDate, endDate)
-		if err != nil {
-			log.Printf("Preload invitations failed: %v", err)
-		}
+	// 	_, err = invitationService.PreloadInvitationsCache(startDate, endDate)
+	// 	if err != nil {
+	// 		log.Printf("Preload invitations failed: %v", err)
+	// 	}
 
-		_, err = invitationService.PreloadCustomers(startDate, endDate)
-		if err != nil {
-			log.Printf("Preload customers failed: %v", err)
-		}
-		log.Println("All Preload Success")
-	}()
+	// 	_, err = invitationService.PreloadCustomers(startDate, endDate)
+	// 	if err != nil {
+	// 		log.Printf("Preload customers failed: %v", err)
+	// 	}
+	// 	log.Println("All Preload Success")
+	// }()
 
-	// เรียก scheduler preload ทุกตี 1
-	scheduleDailyPreload(invitationService, transactionService)
+	// // เรียก scheduler preload ทุกตี 1
+	// scheduleDailyPreload(invitationService, transactionService)
 
 	e := echo.New()
 	e.OPTIONS("/*", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 	// e.Use(middleware.CORS())
-	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
-	// 	AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
-	// 	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	// 	AllowCredentials: true, // ถ้าใช้ cookie หรือ token
-	// }))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodOptions},
@@ -85,43 +76,43 @@ func main() {
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
-func scheduleDailyPreload(invitationService *invitation.Service, transactionService *transaction.Service) {
-	go func() {
-		for {
-			now := time.Now()
-			next1AM := time.Date(now.Year(), now.Month(), now.Day(), 1, 0, 0, 0, now.Location())
-			if now.After(next1AM) {
-				next1AM = next1AM.Add(24 * time.Hour)
-			}
-			wait := time.Until(next1AM)
-			log.Printf("Waiting %v until next preload at 01:00\n", wait)
+// func scheduleDailyPreload(invitationService *invitation.Service, transactionService *transaction.Service) {
+// 	go func() {
+// 		for {
+// 			now := time.Now()
+// 			next1AM := time.Date(now.Year(), now.Month(), now.Day(), 1, 0, 0, 0, now.Location())
+// 			if now.After(next1AM) {
+// 				next1AM = next1AM.Add(24 * time.Hour)
+// 			}
+// 			wait := time.Until(next1AM)
+// 			log.Printf("Waiting %v until next preload at 01:00\n", wait)
 
-			time.Sleep(wait)
+// 			time.Sleep(wait)
 
-			// เรียก preload ที่ต้องการ
-			// startDate := "2025-01-01"
-			datedu,err := invitationService.GetDuration()
-			if err != nil {
-				log.Printf("Preload failed: %v", err)
-			}
+// 			// เรียก preload ที่ต้องการ
+// 			// startDate := "2025-01-01"
+// 			datedu,err := invitationService.GetDuration()
+// 			if err != nil {
+// 				log.Printf("Preload failed: %v", err)
+// 			}
 
-			startDate := datedu.Start_date.Format("2006-01-02")
-			endDate := time.Now().Format("2006-01-02")
+// 			startDate := datedu.Start_date.Format("2006-01-02")
+// 			endDate := time.Now().Format("2006-01-02")
 
 
-			log.Println("Starting daily preload at 01:00...")
-			if _, err := transactionService.PreloadTransactionCache(startDate, endDate); err != nil {
-				log.Printf("Preload transactions failed: %v", err)
-			}
-			if _, err := invitationService.PreloadInvitationsCache(startDate, endDate); err != nil {
-				log.Printf("Preload invitations failed: %v", err)
-			}
-			if _, err := invitationService.PreloadCustomers(startDate, endDate); err != nil {
-				log.Printf("Preload customers failed: %v", err)
-			}
-			log.Println("Daily preload complete")
+// 			log.Println("Starting daily preload at 01:00...")
+// 			if _, err := transactionService.PreloadTransactionCache(startDate, endDate); err != nil {
+// 				log.Printf("Preload transactions failed: %v", err)
+// 			}
+// 			if _, err := invitationService.PreloadInvitationsCache(startDate, endDate); err != nil {
+// 				log.Printf("Preload invitations failed: %v", err)
+// 			}
+// 			if _, err := invitationService.PreloadCustomers(startDate, endDate); err != nil {
+// 				log.Printf("Preload customers failed: %v", err)
+// 			}
+// 			log.Println("Daily preload complete")
 
-			time.Sleep(24 * time.Hour) // รออีก 24 ชั่วโมงถัดไป
-		}
-	}()
-}
+// 			time.Sleep(24 * time.Hour) // รออีก 24 ชั่วโมงถัดไป
+// 		}
+// 	}()
+// }

@@ -30,16 +30,16 @@ func (r *InvitationRoute) sendinvitation(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing date parameters"})
 	}
 
-	// customer, err := r.InvitationService.GetAllCustomers(db.DB, startDate, endDate,selectedAllProfile)
-	customer, err := r.InvitationService.GetCachedCustomers(startDate, endDate,selectedAllProfile)
+	customer, err := r.InvitationService.GetAllCustomers(startDate, endDate,selectedAllProfile)
+	// customer, err := r.InvitationService.GetCachedCustomers(startDate, endDate,selectedAllProfile)
 
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 
 	}
-	// invitations, err := r.InvitationService.GetAllInvitation(db.DB, startDate, endDate, dateType,selected1InvPProfile)
-	invitations, err := r.InvitationService.GetCachedInvitations(startDate,endDate,dateType,selected1InvPProfile)
+	invitations, err := r.InvitationService.GetAllInvitation(startDate, endDate, dateType,selected1InvPProfile)
+	// invitations, err := r.InvitationService.GetCachedInvitations(startDate,endDate,dateType,selected1InvPProfile)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})

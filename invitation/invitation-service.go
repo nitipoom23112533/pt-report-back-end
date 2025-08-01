@@ -6,8 +6,6 @@ import (
 	"pt-report-backend/db"
 	"sync"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 type Service struct {
     CacheMutex  sync.RWMutex
@@ -31,7 +29,7 @@ func (s *Service) GetDuration() (Duration, error) {
     return du, nil
 }
 
-func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
+func (s *Service)GetAllCustomers(startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
     
     var customers []Customer
     if selectedAllProfile == "1" {
@@ -44,7 +42,7 @@ func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selected
 	            FROM pt_customer
 	            GROUP BY Customer_code;` // ดึงข้อมูลทั้งหมด
                 
-        err := db.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
+        err := db.DB.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
         if err != nil {
             log.Printf("Error fetching customers: %v", err)
             return nil, err
@@ -59,7 +57,7 @@ func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selected
 	            FROM pt_customer where Customer_date between ? and ?
 	            GROUP BY Customer_code;` // ดึงข้อมูลทั้งหมด
 
-        err := db.Select(&customers, query, startDate, endDate) // ดึงข้อมูลทั้งหมดใส่ slice
+        err := db.DB.Select(&customers, query, startDate, endDate) // ดึงข้อมูลทั้งหมดใส่ slice
         if err != nil {
             log.Printf("Error fetching customers: %v", err)
             return nil, err
@@ -67,7 +65,7 @@ func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selected
     }
 	return customers, nil
 }
-func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateType string,selected1InvPProfile string)([]Invitation,error)  {
+func (s *Service)GetAllInvitation(startDate, endDate string,dateType string,selected1InvPProfile string)([]Invitation,error)  {
     // Choose the correct date column based on dateType
     var dateColumn string
     if dateType == "invitationDate" {
@@ -89,7 +87,7 @@ func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateTyp
                             WHERE %s BETWEEN ? AND ?
                             %s`, Wallet_type,dateColumn,grpb)
     var invitation []Invitation
-    err := db.Select(&invitation,query, startDate, endDate)
+    err := db.DB.Select(&invitation,query, startDate, endDate)
     if err != nil {
         log.Printf("Error fetching invitation: %v", err)
 		return nil, err
