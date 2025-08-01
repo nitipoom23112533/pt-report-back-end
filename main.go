@@ -57,7 +57,13 @@ func main() {
 	scheduleDailyPreload(invitationService, transactionService)
 
 	e := echo.New()
-	e.Use(middleware.CORS())
+	// e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowCredentials: true, // ถ้าใช้ cookie หรือ token
+	}))
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	apiClient := api.NewAPI(invitationService,transactionService)
