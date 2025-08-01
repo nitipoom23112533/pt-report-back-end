@@ -1,17 +1,36 @@
 package invitation
 
 import (
+	"fmt"
 	"log"
+	"pt-report-backend/db"
+	"sync"
+	"time"
+
 	"github.com/jmoiron/sqlx"
-    "fmt"
 )
 type Service struct {
+    CacheMutex  sync.RWMutex
+    Cache      []Invitation
+    CacheCustomer      []Customer
     
 }
 
 func NewService() *Service {
 	return &Service{}
 }
+func (s *Service) GetDuration() (Duration, error) {
+    query := `SELECT start_date, end_date FROM duration WHERE id = 1;`
+    var du Duration
+    err := db.DB.Get(&du, query)
+    if err != nil {
+        log.Printf("Error fetching duration: %v", err)
+        return du, err
+    }
+
+    return du, nil
+}
+
 func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
     
     var customers []Customer
@@ -77,6 +96,172 @@ func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateTyp
     }
     return invitation,err
 }
+func (s *Service)PreloadCustomers(startDate, endDate string) ([]Customer, error) {
+    
+    query := `SELECT Customer_code,
+	                MAX(Occupation) AS Occupation,
+                    MAX(Customer_segment) AS Customer_segment,
+                    MAX(Usage_segment) AS Usage_segment,
+                    MAX(Age_range) AS Age_range,
+                    MAX(Gender) AS Gender,
+                    MAX(Customer_date) AS Customer_date
+	            FROM pt_customer
+	            GROUP BY Customer_code ;` // ดึงข้อมูลทั้งหมด
+    // query := `SELECT Customer_code,
+	//                 MAX(Occupation) AS Occupation,
+    //                 MAX(Customer_segment) AS Customer_segment,
+    //                 MAX(Usage_segment) AS Usage_segment,
+    //                 MAX(Age_range) AS Age_range,
+    //                 MAX(Gender) AS Gender,
+    //                 MAX(Customer_date) AS Customer_date
+	//             FROM pt_customer where Customer_date between ? and ?
+	//             GROUP BY Customer_code LIMIT 10;` // ดึงข้อมูลทั้งหมด
+
+    var customers []Customer
+    // err := db.DB.Select(&customers, query,startDate,endDate) // ดึงข้อมูลทั้งหมดใส่ slice
+    err := db.DB.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
+
+    if err != nil {
+        log.Printf("Error fetching customers: %v", err)
+        return nil, err
+    }
+    s.CacheMutex.Lock()
+	s.CacheCustomer = customers
+	s.CacheMutex.Unlock()
+
+	log.Println("Customers cache refreshed")
+	return customers, nil
+}
+// preload ข้อมูลจาก DB
+func (s *Service) PreloadInvitationsCache(startDate, endDate string) ([]Invitation, error) {
+
+    // query := `
+	// 	SELECT EDR_id, Wallet_type,IN_date,T_date
+	// 	FROM pt_invitation
+	// 	WHERE T_date BETWEEN ? AND ? LIMIT 10
+		// `
+    query := `
+		SELECT EDR_id, Wallet_type,IN_date,T_date
+		FROM pt_invitation
+		WHERE T_date BETWEEN ? AND ?
+		`
+	var invitations []Invitation
+	err := db.DB.Select(&invitations, query, startDate, endDate)
+	if err != nil {
+		log.Printf("Error fetching invitation: %v", err)
+		return nil, err
+	}
+
+	s.CacheMutex.Lock()
+	s.Cache = invitations
+	s.CacheMutex.Unlock()
+
+	log.Println("Invitation cache refreshed")
+	return invitations, nil
+}
+
+func (s *Service) GetCachedInvitations(startDate string, endDate string, dateType string, selected1InvPProfile string) ([]Invitation,error) {
+    log.Println("GetCachedInvitations called")
+
+    dateOnlyLayout := "2006-01-02"
+    datetimeLayout := "2006-01-02T15:04:05-07:00"
+    start, err := time.Parse(dateOnlyLayout, startDate)
+    if err != nil {
+        return nil, err
+    }
+    end, err := time.Parse(dateOnlyLayout, endDate)
+    if err != nil {
+        return nil, err
+    }
+
+    s.CacheMutex.RLock()
+    defer s.CacheMutex.RUnlock()
+
+    var filtered []Invitation
+    mapEDRid := make(map[string]bool) // ใช้สำหรับเช็คว่า EDRid นี้เคยถูกใส่ไปหรือยัง
+    if dateType == "invitationDate" {
+        for _, inv := range s.Cache {
+            invDate, err := time.Parse(datetimeLayout, inv.IN_date) // สมมติเก็บวันที่ใน field DateStr เป็น string
+            if err != nil {
+                log.Println(err)
+            }
+        
+            if (invDate.Equal(start) || invDate.After(start)) && (invDate.Equal(end) || invDate.Before(end)) {
+                if selected1InvPProfile == "1" {
+                    if !mapEDRid[inv.EDR_id] {
+                        mapEDRid[inv.EDR_id] = true // mark ว่าเจอแล้ว
+                        filtered = append(filtered, inv)
+                    }
+                }else{
+                    filtered = append(filtered, inv)
+                }
+                
+            }
+        }
+    } else {
+        for _, inv := range s.Cache {
+            traDate, err := time.Parse(datetimeLayout, inv.T_date) // สมมติเก็บวันที่ใน field DateStr เป็น string
+            if err != nil {
+                log.Println(err)
+            }
+        
+            if (traDate.Equal(start) || traDate.After(start)) && (traDate.Equal(end) || traDate.Before(end)) {
+                // filtered = append(filtered, inv)
+                if selected1InvPProfile == "1" {
+                    if !mapEDRid[inv.EDR_id] {
+                        mapEDRid[inv.EDR_id] = true // mark ว่าเจอแล้ว
+                        filtered = append(filtered, inv)
+                    }
+                }else{
+                    filtered = append(filtered, inv)
+                }
+            }
+        }
+    }
+    
+    return filtered, nil
+}
+
+func (s *Service) GetCachedCustomers(startDate string, endDate string,selectedAllProfile string) ([]Customer,error) {
+    log.Println("GetCachedCustomers called")
+	// s.CacheMutex.RLock()
+	// defer s.CacheMutex.RUnlock()
+	// return s.Cache,nil
+    dateOnlyLayout := "2006-01-02"
+    datetimeLayout := "2006-01-02T15:04:05-07:00"
+    start, err := time.Parse(dateOnlyLayout, startDate)
+    if err != nil {
+        return nil, err
+    }
+    end, err := time.Parse(dateOnlyLayout, endDate)
+    if err != nil {
+        return nil, err
+    }
+
+    s.CacheMutex.RLock()
+    defer s.CacheMutex.RUnlock()
+
+    var filtered []Customer
+    if selectedAllProfile == "1" {
+
+        return s.CacheCustomer,nil
+
+    } else {
+        for _, cus := range s.CacheCustomer {
+            traDate, err := time.Parse(datetimeLayout, cus.Customer_date) // สมมติเก็บวันที่ใน field DateStr เป็น string
+            if err != nil {
+                log.Println(err)
+            }
+        
+            if (traDate.Equal(start) || traDate.After(start)) && (traDate.Equal(end) || traDate.Before(end)) {
+                filtered = append(filtered, cus)
+            }
+        }
+    }
+    
+    return filtered, nil
+}
+
 
 func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation) (CountOccupation,Wallet_type) {
 	var countOccupation CountOccupation
@@ -1157,7 +1342,487 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS99++
                 case "PT19":
                     countWallet_type.PT19CS99++
-                }    
+                }
+            case "Career Starter - Lower":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01CSL++
+                case "PT02":
+                    countWallet_type.PT02CSL++
+                case "PT03":
+                    countWallet_type.PT03CSL++
+                case "PT05":
+                    countWallet_type.PT05CSL++
+                case "PT06":
+                    countWallet_type.PT06CSL++
+                case "PT08":
+                    countWallet_type.PT08CSL++
+                case "PT09":
+                    countWallet_type.PT09CSL++
+                case "PT10":
+                    countWallet_type.PT10CSL++
+                case "PT15":
+                    countWallet_type.PT15CSL++
+                case "PT16":
+                    countWallet_type.PT16CSL++
+                case "PT17":
+                    countWallet_type.PT17CSL++
+                case "PT18":
+                    countWallet_type.PT18CSL++
+                case "PT19":
+                    countWallet_type.PT19CSL++
+                }
+            case "Career Starter - Middle":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01CSM++
+                case "PT02":
+                    countWallet_type.PT02CSM++
+                case "PT03":
+                    countWallet_type.PT03CSM++
+                case "PT05":
+                    countWallet_type.PT05CSM++
+                case "PT06":
+                    countWallet_type.PT06CSM++
+                case "PT08":
+                    countWallet_type.PT08CSM++
+                case "PT09":
+                    countWallet_type.PT09CSM++
+                case "PT10":
+                    countWallet_type.PT10CSM++
+                case "PT15":
+                    countWallet_type.PT15CSM++
+                case "PT16":
+                    countWallet_type.PT16CSM++
+                case "PT17":
+                    countWallet_type.PT17CSM++
+                case "PT18":
+                    countWallet_type.PT18CSM++
+                case "PT19":
+                    countWallet_type.PT19CSM++
+                }
+            case "Career Starter - Upper":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01CSU++
+                case "PT02":
+                    countWallet_type.PT02CSU++
+                case "PT03":
+                    countWallet_type.PT03CSU++
+                case "PT05":
+                    countWallet_type.PT05CSU++
+                case "PT06":
+                    countWallet_type.PT06CSU++
+                case "PT08":
+                    countWallet_type.PT08CSU++
+                case "PT09":
+                    countWallet_type.PT09CSU++
+                case "PT10":
+                    countWallet_type.PT10CSU++
+                case "PT15":
+                    countWallet_type.PT15CSU++
+                case "PT16":
+                    countWallet_type.PT16CSU++
+                case "PT17":
+                    countWallet_type.PT17CSU++
+                case "PT18":
+                    countWallet_type.PT18CSU++
+                case "PT19":
+                    countWallet_type.PT19CSU++
+                }
+            case "Children/Student":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01CS++
+                case "PT02":
+                    countWallet_type.PT02CS++
+                case "PT03":
+                    countWallet_type.PT03CS++
+                case "PT05":
+                    countWallet_type.PT05CS++
+                case "PT06":
+                    countWallet_type.PT06CS++
+                case "PT08":
+                    countWallet_type.PT08CS++
+                case "PT09":
+                    countWallet_type.PT09CS++
+                case "PT10":
+                    countWallet_type.PT10CS++
+                case "PT15":
+                    countWallet_type.PT15CS++
+                case "PT16":
+                    countWallet_type.PT16CS++
+                case "PT17":
+                    countWallet_type.PT17CS++
+                case "PT18":
+                    countWallet_type.PT18CS++
+                case "PT19":
+                    countWallet_type.PT19CS++
+                }
+            case "Future Builder":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01FB++
+                case "PT02":
+                    countWallet_type.PT02FB++
+                case "PT03":
+                    countWallet_type.PT03FB++
+                case "PT05":
+                    countWallet_type.PT05FB++
+                case "PT06":
+                    countWallet_type.PT06FB++
+                case "PT08":
+                    countWallet_type.PT08FB++
+                case "PT09":
+                    countWallet_type.PT09FB++
+                case "PT10":
+                    countWallet_type.PT10FB++
+                case "PT15":
+                    countWallet_type.PT15FB++
+                case "PT16":
+                    countWallet_type.PT16FB++
+                case "PT17":
+                    countWallet_type.PT17FB++
+                case "PT18":
+                    countWallet_type.PT18FB++
+                case "PT19":
+                    countWallet_type.PT19FB++
+                }
+            case "Lower Mass":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01LM++
+                case "PT02":
+                    countWallet_type.PT02LM++
+                case "PT03":
+                    countWallet_type.PT03LM++
+                case "PT05":
+                    countWallet_type.PT05LM++
+                case "PT06":
+                    countWallet_type.PT06LM++
+                case "PT08":
+                    countWallet_type.PT08LM++
+                case "PT09":
+                    countWallet_type.PT09LM++
+                case "PT10":
+                    countWallet_type.PT10LM++
+                case "PT15":
+                    countWallet_type.PT15LM++
+                case "PT16":
+                    countWallet_type.PT16LM++
+                case "PT17":
+                    countWallet_type.PT17LM++
+                case "PT18":
+                    countWallet_type.PT18LM++
+                case "PT19":
+                    countWallet_type.PT19LM++
+                }
+            case "Mass - Lower":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01ML++
+                case "PT02":
+                    countWallet_type.PT02ML++
+                case "PT03":
+                    countWallet_type.PT03ML++
+                case "PT05":
+                    countWallet_type.PT05ML++
+                case "PT06":
+                    countWallet_type.PT06ML++
+                case "PT08":
+                    countWallet_type.PT08ML++
+                case "PT09":
+                    countWallet_type.PT09ML++
+                case "PT10":
+                    countWallet_type.PT10ML++
+                case "PT15":
+                    countWallet_type.PT15ML++
+                case "PT16":
+                    countWallet_type.PT16ML++
+                case "PT17":
+                    countWallet_type.PT17ML++
+                case "PT18":
+                    countWallet_type.PT18ML++
+                case "PT19":
+                    countWallet_type.PT19ML++
+                }
+            case "Mass - Middle":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01MM++
+                case "PT02":
+                    countWallet_type.PT02MM++
+                case "PT03":
+                    countWallet_type.PT03MM++
+                case "PT05":
+                    countWallet_type.PT05MM++
+                case "PT06":
+                    countWallet_type.PT06MM++
+                case "PT08":
+                    countWallet_type.PT08MM++
+                case "PT09":
+                    countWallet_type.PT09MM++
+                case "PT10":
+                    countWallet_type.PT10MM++
+                case "PT15":
+                    countWallet_type.PT15MM++
+                case "PT16":
+                    countWallet_type.PT16MM++
+                case "PT17":
+                    countWallet_type.PT17MM++
+                case "PT18":
+                    countWallet_type.PT18MM++
+                case "PT19":
+                    countWallet_type.PT19MM++
+                }
+            case "Mass - Upper":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01MU++
+                case "PT02":
+                    countWallet_type.PT02MU++
+                case "PT03":
+                    countWallet_type.PT03MU++
+                case "PT05":
+                    countWallet_type.PT05MU++
+                case "PT06":
+                    countWallet_type.PT06MU++
+                case "PT08":
+                    countWallet_type.PT08MU++
+                case "PT09":
+                    countWallet_type.PT09MU++
+                case "PT10":
+                    countWallet_type.PT10MU++
+                case "PT15":
+                    countWallet_type.PT15MU++
+                case "PT16":
+                    countWallet_type.PT16MU++
+                case "PT17":
+                    countWallet_type.PT17MU++
+                case "PT18":
+                    countWallet_type.PT18MU++
+                case "PT19":
+                    countWallet_type.PT19MU++
+                }
+            case "Pre-Senior":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01PS++
+                case "PT02":
+                    countWallet_type.PT02PS++
+                case "PT03":
+                    countWallet_type.PT03PS++
+                case "PT05":
+                    countWallet_type.PT05PS++
+                case "PT06":
+                    countWallet_type.PT06PS++
+                case "PT08":
+                    countWallet_type.PT08PS++
+                case "PT09":
+                    countWallet_type.PT09PS++
+                case "PT10":
+                    countWallet_type.PT10PS++
+                case "PT15":
+                    countWallet_type.PT15PS++
+                case "PT16":
+                    countWallet_type.PT16PS++
+                case "PT17":
+                    countWallet_type.PT17PS++
+                case "PT18":
+                    countWallet_type.PT18PS++
+                case "PT19":
+                    countWallet_type.PT19PS++
+                }
+            case "Senior - Lower":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01SL++
+                case "PT02":
+                    countWallet_type.PT02SL++
+                case "PT03":
+                    countWallet_type.PT03SL++
+                case "PT05":
+                    countWallet_type.PT05SL++
+                case "PT06":
+                    countWallet_type.PT06SL++
+                case "PT08":
+                    countWallet_type.PT08SL++
+                case "PT09":
+                    countWallet_type.PT09SL++
+                case "PT10":
+                    countWallet_type.PT10SL++
+                case "PT15":
+                    countWallet_type.PT15SL++
+                case "PT16":
+                    countWallet_type.PT16SL++
+                case "PT17":
+                    countWallet_type.PT17SL++
+                case "PT18":
+                    countWallet_type.PT18SL++
+                case "PT19":
+                    countWallet_type.PT19SL++
+                }
+            case "Senior - Upper":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01SU++
+                case "PT02":
+                    countWallet_type.PT02SU++
+                case "PT03":
+                    countWallet_type.PT03SU++
+                case "PT05":
+                    countWallet_type.PT05SU++
+                case "PT06":
+                    countWallet_type.PT06SU++
+                case "PT08":
+                    countWallet_type.PT08SU++
+                case "PT09":
+                    countWallet_type.PT09SU++
+                case "PT10":
+                    countWallet_type.PT10SU++
+                case "PT15":
+                    countWallet_type.PT15SU++
+                case "PT16":
+                    countWallet_type.PT16SU++
+                case "PT17":
+                    countWallet_type.PT17SU++
+                case "PT18":
+                    countWallet_type.PT18SU++
+                case "PT19":
+                    countWallet_type.PT19SU++
+                }
+            case "University Student":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01US++
+                case "PT02":
+                    countWallet_type.PT02US++
+                case "PT03":
+                    countWallet_type.PT03US++
+                case "PT05":
+                    countWallet_type.PT05US++
+                case "PT06":
+                    countWallet_type.PT06US++
+                case "PT08":
+                    countWallet_type.PT08US++
+                case "PT09":
+                    countWallet_type.PT09US++
+                case "PT10":
+                    countWallet_type.PT10US++
+                case "PT15":
+                    countWallet_type.PT15US++
+                case "PT16":
+                    countWallet_type.PT16US++
+                case "PT17":
+                    countWallet_type.PT17US++
+                case "PT18":
+                    countWallet_type.PT18US++
+                case "PT19":
+                    countWallet_type.PT19US++
+                }
+            case "Wealth-to-be":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01WTB++
+                case "PT02":
+                    countWallet_type.PT02WTB++
+                case "PT03":
+                    countWallet_type.PT03WTB++
+                case "PT05":
+                    countWallet_type.PT05WTB++
+                case "PT06":
+                    countWallet_type.PT06WTB++
+                case "PT08":
+                    countWallet_type.PT08WTB++
+                case "PT09":
+                    countWallet_type.PT09WTB++
+                case "PT10":
+                    countWallet_type.PT10WTB++
+                case "PT15":
+                    countWallet_type.PT15WTB++
+                case "PT16":
+                    countWallet_type.PT16WTB++
+                case "PT17":
+                    countWallet_type.PT17WTB++
+                case "PT18":
+                    countWallet_type.PT18WTB++
+                case "PT19":
+                    countWallet_type.PT19WTB++
+                }
+            case "Wealth Potentail":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01WP++
+                case "PT02":
+                    countWallet_type.PT02WP++
+                case "PT03":
+                    countWallet_type.PT03WP++
+                case "PT05":
+                    countWallet_type.PT05WP++
+                case "PT06":
+                    countWallet_type.PT06WP++
+                case "PT08":
+                    countWallet_type.PT08WP++
+                case "PT09":
+                    countWallet_type.PT09WP++
+                case "PT10":
+                    countWallet_type.PT10WP++
+                case "PT15":
+                    countWallet_type.PT15WP++
+                case "PT16":
+                    countWallet_type.PT16WP++
+                case "PT17":
+                    countWallet_type.PT17WP++
+                case "PT18":
+                    countWallet_type.PT18WP++
+                case "PT19":
+                    countWallet_type.PT19WP++
+                }
+            case "Wealth":
+                countOccupation.OTH++
+                switch inv.Wallet_type {
+                case "PT01":
+                    countWallet_type.PT01W++
+                case "PT02":
+                    countWallet_type.PT02W++
+                case "PT03":
+                    countWallet_type.PT03W++
+                case "PT05":
+                    countWallet_type.PT05W++
+                case "PT06":
+                    countWallet_type.PT06W++
+                case "PT08":
+                    countWallet_type.PT08W++
+                case "PT09":
+                    countWallet_type.PT09W++
+                case "PT10":
+                    countWallet_type.PT10W++
+                case "PT15":
+                    countWallet_type.PT15W++
+                case "PT16":
+                    countWallet_type.PT16W++
+                case "PT17":
+                    countWallet_type.PT17W++
+                case "PT18":
+                    countWallet_type.PT18W++
+                case "PT19":
+                    countWallet_type.PT19W++
+                }
             default:
                 countOccupation.NULL_Custmer_segment++
                 switch inv.Wallet_type {
