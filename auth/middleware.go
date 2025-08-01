@@ -7,13 +7,29 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 )
-func Auth() echo.MiddlewareFunc {
+// func Auth() echo.MiddlewareFunc {
 	
+// 	config := echojwt.Config{
+// 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+// 			return new(JWTCustomClaims)
+// 		},
+// 		SigningKey: []byte(user.GetJWTKey()),
+// 	}
+
+// 	return echojwt.WithConfig(config)
+// }
+
+func Auth() echo.MiddlewareFunc {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(JWTCustomClaims)
 		},
 		SigningKey: []byte(user.GetJWTKey()),
+
+		// ✅ ให้ข้าม OPTIONS method ไปเลย เพื่อไม่ให้โดน JWT block
+		Skipper: func(c echo.Context) bool {
+			return c.Request().Method == "OPTIONS"
+		},
 	}
 
 	return echojwt.WithConfig(config)

@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"time"
+	"net/http"
 )
 
 func main() {
@@ -37,32 +38,43 @@ func main() {
 	startDate := datedu.Start_date.Format("2006-01-02")
 	endDate := time.Now().Format("2006-01-02")
 
-	_,err = transactionService.PreloadTransactionCache(startDate,endDate)
-	if err != nil {
-		log.Printf("Preload transactions failed: %v", err)
-	}
+	go func() {
+		_,err = transactionService.PreloadTransactionCache(startDate,endDate)
+		if err != nil {
+			log.Printf("Preload transactions failed: %v", err)
+		}
 
-	_, err = invitationService.PreloadInvitationsCache(startDate, endDate)
-	if err != nil {
-		log.Printf("Preload invitations failed: %v", err)
-	}
+		_, err = invitationService.PreloadInvitationsCache(startDate, endDate)
+		if err != nil {
+			log.Printf("Preload invitations failed: %v", err)
+		}
 
-	_, err = invitationService.PreloadCustomers(startDate, endDate)
-	if err != nil {
-		log.Printf("Preload customers failed: %v", err)
-	}
-	log.Println("All Preload Success")
+		_, err = invitationService.PreloadCustomers(startDate, endDate)
+		if err != nil {
+			log.Printf("Preload customers failed: %v", err)
+		}
+		log.Println("All Preload Success")
+	}()
 
 	// เรียก scheduler preload ทุกตี 1
 	scheduleDailyPreload(invitationService, transactionService)
 
 	e := echo.New()
+	e.OPTIONS("/*", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
 	// e.Use(middleware.CORS())
+	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	// 	AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
+	// 	AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
+	// 	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	// 	AllowCredentials: true, // ถ้าใช้ cookie หรือ token
+	// }))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-		AllowCredentials: true, // ถ้าใช้ cookie หรือ token
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
 	}))
 	e.Pre(middleware.RemoveTrailingSlash())
 
