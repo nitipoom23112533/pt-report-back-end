@@ -35,9 +35,6 @@ func (s *Service)GetAllTransaction(startDate, endDate string)([]Transaction,erro
 
 func (s *Service) PreloadTransactionCache(startDate, endDate string) ([]Transaction, error) {
 
-    // query := `SELECT Customer_code, Wallet_type,T_date
-    //                         FROM pt_transaction 
-    //                         WHERE T_date BETWEEN ? AND ? LIMIT 10;`
     query := `SELECT Customer_code, Wallet_type,T_date
                             FROM pt_transaction 
                             WHERE T_date BETWEEN ? AND ?;`

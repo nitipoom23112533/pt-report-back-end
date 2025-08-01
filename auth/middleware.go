@@ -7,17 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 )
-// func Auth() echo.MiddlewareFunc {
-	
-// 	config := echojwt.Config{
-// 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-// 			return new(JWTCustomClaims)
-// 		},
-// 		SigningKey: []byte(user.GetJWTKey()),
-// 	}
-
-// 	return echojwt.WithConfig(config)
-// }
 
 func Auth() echo.MiddlewareFunc {
 	config := echojwt.Config{

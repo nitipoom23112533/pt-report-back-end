@@ -105,18 +105,7 @@ func (s *Service)PreloadCustomers(startDate, endDate string) ([]Customer, error)
                     MAX(Customer_date) AS Customer_date
 	            FROM pt_customer
 	            GROUP BY Customer_code ;` // ดึงข้อมูลทั้งหมด
-    // query := `SELECT Customer_code,
-	//                 MAX(Occupation) AS Occupation,
-    //                 MAX(Customer_segment) AS Customer_segment,
-    //                 MAX(Usage_segment) AS Usage_segment,
-    //                 MAX(Age_range) AS Age_range,
-    //                 MAX(Gender) AS Gender,
-    //                 MAX(Customer_date) AS Customer_date
-	//             FROM pt_customer where Customer_date between ? and ?
-	//             GROUP BY Customer_code LIMIT 10;` // ดึงข้อมูลทั้งหมด
-
     var customers []Customer
-    // err := db.DB.Select(&customers, query,startDate,endDate) // ดึงข้อมูลทั้งหมดใส่ slice
     err := db.DB.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
 
     if err != nil {
@@ -133,11 +122,6 @@ func (s *Service)PreloadCustomers(startDate, endDate string) ([]Customer, error)
 // preload ข้อมูลจาก DB
 func (s *Service) PreloadInvitationsCache(startDate, endDate string) ([]Invitation, error) {
 
-    // query := `
-	// 	SELECT EDR_id, Wallet_type,IN_date,T_date
-	// 	FROM pt_invitation
-	// 	WHERE T_date BETWEEN ? AND ? LIMIT 10
-		// `
     query := `
 		SELECT EDR_id, Wallet_type,IN_date,T_date
 		FROM pt_invitation
@@ -204,7 +188,6 @@ func (s *Service) GetCachedInvitations(startDate string, endDate string, dateTyp
             }
         
             if (traDate.Equal(start) || traDate.After(start)) && (traDate.Equal(end) || traDate.Before(end)) {
-                // filtered = append(filtered, inv)
                 if selected1InvPProfile == "1" {
                     if !mapEDRid[inv.EDR_id] {
                         mapEDRid[inv.EDR_id] = true // mark ว่าเจอแล้ว
@@ -222,9 +205,6 @@ func (s *Service) GetCachedInvitations(startDate string, endDate string, dateTyp
 
 func (s *Service) GetCachedCustomers(startDate string, endDate string,selectedAllProfile string) ([]Customer,error) {
     log.Println("GetCachedCustomers called")
-	// s.CacheMutex.RLock()
-	// defer s.CacheMutex.RUnlock()
-	// return s.Cache,nil
     dateOnlyLayout := "2006-01-02"
     datetimeLayout := "2006-01-02T15:04:05-07:00"
     start, err := time.Parse(dateOnlyLayout, startDate)

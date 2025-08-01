@@ -12,23 +12,6 @@ type API struct {
 	TransactionRoute *TransactionRoute
 }
 
-// func NewAPI() *API {
-// 	InvitationService := invitation.NewService()
-// 	TransactionService := transaction.NewService()
-	
-// 	return &API{
-// 		InvitationRoute: &InvitationRoute{
-// 			InvitationService: InvitationService,
-// 		},
-// 		TransactionRoute: &TransactionRoute{
-// 			TransactionService: TransactionService,
-// 			InvitationService: InvitationService,
-
-// 		},
-
-// 	}
-// }
-
 func NewAPI(invitationService *invitation.Service, transactionService *transaction.Service) *API {
 	return &API{
 		InvitationRoute: &InvitationRoute{
@@ -46,10 +29,6 @@ func (api *API) Group(g *echo.Group)  {
 	api.InvitationRoute.Group(ptReportGroup)
 	api.TransactionRoute.Group(ptReportGroup)
 
-	// g.POST("/refresh-cache", api.refreshCache)
 }
 
-// func (api *API) refreshCache(c echo.Context) error {
-
-// }
 
