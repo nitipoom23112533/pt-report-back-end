@@ -1,9 +1,32 @@
-runtime: go122  # หรือ go121 ถ้าใช้ Go 1.21
-# instance_class: F1  # ใช้ F1 สำหรับ Free Tier
-# entrypoint: go run main.go  # คำสั่งเริ่มต้นรันแอป
+# runtime: go122  # หรือ go121 ถ้าใช้ Go 1.21
 
-# automatic_scaling:
-#   target_cpu_utilization: 0.65
-#   min_instances: 1
-#   max_instances: 5
+# # instance_class: F1  # ใช้ F1 สำหรับ Free Tier
+# # entrypoint: go run main.go  # คำสั่งเริ่มต้นรันแอป
 
+# # automatic_scaling:
+# #   target_cpu_utilization: 0.65
+# #   min_instances: 1
+# #   max_instances: 5
+
+runtime: go
+env: flex
+
+entrypoint: go run main.go  # หรือถ้า build เป็น binary แล้วก็ ./main
+
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 3
+  cpu_utilization:
+    target_utilization: 0.65
+
+liveness_check:
+  path: "/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 4
+  success_threshold: 2
