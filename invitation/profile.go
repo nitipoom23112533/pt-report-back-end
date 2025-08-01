@@ -39,6 +39,25 @@ type CountOccupation struct {
 	OTH int `json:"Oth"`
 	NULL_Custmer_segment int `json:"NULL_Custmer_segment"`
 
+	// Life Stage Segment
+	CareerStarterLower int `json:"CareerStarterLower"`
+	CareerStarterMiddle int `json:"CareerStarterMiddle"`
+	CareerStarterUpper int `json:"CareerStarterUpper"`
+	ChildrenOrStudent int `json:"ChildrenOrStudent"`
+	FutureBuilder int `json:"FutureBuilder"`
+	LowerMass int `json:"LowerMass"`
+	MassLower int `json:"MassLower"`
+	MassMiddle int `json:"MassMiddle"`
+	MassUpper int `json:"MassUpper"`
+	LSSNA int `json:"LSSNA"`
+	PreSenior int `json:"Presenior"`
+	SeniorLower int `json:"SeniorLower"`
+	SeniorUpper int `json:"SeniorUpper"`
+	UniversityStudent int `json:"UniversityStudent"`
+	WealthToBe int `json:"WealthToBe"`
+	WealthPotentail int `json:"WealthPotentail"`
+	LSSWealth int `json:"LSSWealth"`
+
 	//Usage_segment
 	Low                int `json:"Low"`
 	Medium             int `json:"Medium"`
