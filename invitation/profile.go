@@ -7,6 +7,7 @@ type Customer struct {
 	Usage_segment string `db:"Usage_segment"`
 	Age_range string `db:"Age_range"`
 	Gender string `db:"Gender"`
+	Customer_date string `db:"Customer_date"`
 }
 type CountOccupation struct {
 	// //Occupation

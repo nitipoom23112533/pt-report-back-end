@@ -4,14 +4,32 @@ import (
 	"log"
 	"github.com/jmoiron/sqlx"
     "fmt"
+    "sync"
+    "time"
+    "pt-report-backend/db"
 )
 type Service struct {
+    CacheMutex  sync.RWMutex
+    Cache      []Invitation
+    CacheCustomer      []Customer
     
 }
 
 func NewService() *Service {
 	return &Service{}
 }
+func (s *Service) GetDuration() (Duration, error) {
+    query := `SELECT start_date, end_date FROM duration WHERE id = 1;`
+    var du Duration
+    err := db.DB.Get(&du, query)
+    if err != nil {
+        log.Printf("Error fetching duration: %v", err)
+        return du, err
+    }
+
+    return du, nil
+}
+
 func (s *Service)GetAllCustomers(db *sqlx.DB, startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
     
     var customers []Customer
@@ -77,6 +95,172 @@ func (s *Service)GetAllInvitation(db *sqlx.DB, startDate, endDate string,dateTyp
     }
     return invitation,err
 }
+func (s *Service)PreloadCustomers(startDate, endDate string) ([]Customer, error) {
+    
+    query := `SELECT Customer_code,
+	                MAX(Occupation) AS Occupation,
+                    MAX(Customer_segment) AS Customer_segment,
+                    MAX(Usage_segment) AS Usage_segment,
+                    MAX(Age_range) AS Age_range,
+                    MAX(Gender) AS Gender,
+                    MAX(Customer_date) AS Customer_date
+	            FROM pt_customer
+	            GROUP BY Customer_code ;` // ดึงข้อมูลทั้งหมด
+    // query := `SELECT Customer_code,
+	//                 MAX(Occupation) AS Occupation,
+    //                 MAX(Customer_segment) AS Customer_segment,
+    //                 MAX(Usage_segment) AS Usage_segment,
+    //                 MAX(Age_range) AS Age_range,
+    //                 MAX(Gender) AS Gender,
+    //                 MAX(Customer_date) AS Customer_date
+	//             FROM pt_customer where Customer_date between ? and ?
+	//             GROUP BY Customer_code LIMIT 10;` // ดึงข้อมูลทั้งหมด
+
+    var customers []Customer
+    // err := db.DB.Select(&customers, query,startDate,endDate) // ดึงข้อมูลทั้งหมดใส่ slice
+    err := db.DB.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
+
+    if err != nil {
+        log.Printf("Error fetching customers: %v", err)
+        return nil, err
+    }
+    s.CacheMutex.Lock()
+	s.CacheCustomer = customers
+	s.CacheMutex.Unlock()
+
+	log.Println("Customers cache refreshed")
+	return customers, nil
+}
+// preload ข้อมูลจาก DB
+func (s *Service) PreloadInvitationsCache(startDate, endDate string) ([]Invitation, error) {
+
+    // query := `
+	// 	SELECT EDR_id, Wallet_type,IN_date,T_date
+	// 	FROM pt_invitation
+	// 	WHERE T_date BETWEEN ? AND ? LIMIT 10
+		// `
+    query := `
+		SELECT EDR_id, Wallet_type,IN_date,T_date
+		FROM pt_invitation
+		WHERE T_date BETWEEN ? AND ?
+		`
+	var invitations []Invitation
+	err := db.DB.Select(&invitations, query, startDate, endDate)
+	if err != nil {
+		log.Printf("Error fetching invitation: %v", err)
+		return nil, err
+	}
+
+	s.CacheMutex.Lock()
+	s.Cache = invitations
+	s.CacheMutex.Unlock()
+
+	log.Println("Invitation cache refreshed")
+	return invitations, nil
+}
+
+func (s *Service) GetCachedInvitations(startDate string, endDate string, dateType string, selected1InvPProfile string) ([]Invitation,error) {
+    log.Println("GetCachedInvitations called")
+
+    dateOnlyLayout := "2006-01-02"
+    datetimeLayout := "2006-01-02T15:04:05-07:00"
+    start, err := time.Parse(dateOnlyLayout, startDate)
+    if err != nil {
+        return nil, err
+    }
+    end, err := time.Parse(dateOnlyLayout, endDate)
+    if err != nil {
+        return nil, err
+    }
+
+    s.CacheMutex.RLock()
+    defer s.CacheMutex.RUnlock()
+
+    var filtered []Invitation
+    mapEDRid := make(map[string]bool) // ใช้สำหรับเช็คว่า EDRid นี้เคยถูกใส่ไปหรือยัง
+    if dateType == "invitationDate" {
+        for _, inv := range s.Cache {
+            invDate, err := time.Parse(datetimeLayout, inv.IN_date) // สมมติเก็บวันที่ใน field DateStr เป็น string
+            if err != nil {
+                log.Println(err)
+            }
+        
+            if (invDate.Equal(start) || invDate.After(start)) && (invDate.Equal(end) || invDate.Before(end)) {
+                if selected1InvPProfile == "1" {
+                    if !mapEDRid[inv.EDR_id] {
+                        mapEDRid[inv.EDR_id] = true // mark ว่าเจอแล้ว
+                        filtered = append(filtered, inv)
+                    }
+                }else{
+                    filtered = append(filtered, inv)
+                }
+                
+            }
+        }
+    } else {
+        for _, inv := range s.Cache {
+            traDate, err := time.Parse(datetimeLayout, inv.T_date) // สมมติเก็บวันที่ใน field DateStr เป็น string
+            if err != nil {
+                log.Println(err)
+            }
+        
+            if (traDate.Equal(start) || traDate.After(start)) && (traDate.Equal(end) || traDate.Before(end)) {
+                // filtered = append(filtered, inv)
+                if selected1InvPProfile == "1" {
+                    if !mapEDRid[inv.EDR_id] {
+                        mapEDRid[inv.EDR_id] = true // mark ว่าเจอแล้ว
+                        filtered = append(filtered, inv)
+                    }
+                }else{
+                    filtered = append(filtered, inv)
+                }
+            }
+        }
+    }
+    
+    return filtered, nil
+}
+
+func (s *Service) GetCachedCustomers(startDate string, endDate string,selectedAllProfile string) ([]Customer,error) {
+    log.Println("GetCachedCustomers called")
+	// s.CacheMutex.RLock()
+	// defer s.CacheMutex.RUnlock()
+	// return s.Cache,nil
+    dateOnlyLayout := "2006-01-02"
+    datetimeLayout := "2006-01-02T15:04:05-07:00"
+    start, err := time.Parse(dateOnlyLayout, startDate)
+    if err != nil {
+        return nil, err
+    }
+    end, err := time.Parse(dateOnlyLayout, endDate)
+    if err != nil {
+        return nil, err
+    }
+
+    s.CacheMutex.RLock()
+    defer s.CacheMutex.RUnlock()
+
+    var filtered []Customer
+    if selectedAllProfile == "1" {
+
+        return s.CacheCustomer,nil
+
+    } else {
+        for _, cus := range s.CacheCustomer {
+            traDate, err := time.Parse(datetimeLayout, cus.Customer_date) // สมมติเก็บวันที่ใน field DateStr เป็น string
+            if err != nil {
+                log.Println(err)
+            }
+        
+            if (traDate.Equal(start) || traDate.After(start)) && (traDate.Equal(end) || traDate.Before(end)) {
+                filtered = append(filtered, cus)
+            }
+        }
+    }
+    
+    return filtered, nil
+}
+
 
 func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation) (CountOccupation,Wallet_type) {
 	var countOccupation CountOccupation
