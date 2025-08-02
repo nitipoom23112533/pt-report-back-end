@@ -21,8 +21,9 @@ func NewService() *Service {
 
 
 func (s *Service)GetAllTransaction(startDate, endDate string)([]Transaction,error)  {
+    log.Println("GetAllTransaction called")
     query := `SELECT Customer_code, Wallet_type
-                            FROM pt_transaction 
+                            FROM pt_transaction FORCE INDEX (idx_t_date_wallet_type)
                             WHERE T_date BETWEEN ? AND ?;`
     var transaction []Transaction
     err := db.DB.Select(&transaction,query, startDate, endDate)
@@ -30,7 +31,8 @@ func (s *Service)GetAllTransaction(startDate, endDate string)([]Transaction,erro
         log.Printf("Error fetching invitation: %v", err)
 		return nil, err
     }
-    return transaction,err
+    log.Println("Transaction fetched successfully")
+    return transaction,nil
 }
 
 func (s *Service) PreloadTransactionCache(startDate, endDate string) ([]Transaction, error) {

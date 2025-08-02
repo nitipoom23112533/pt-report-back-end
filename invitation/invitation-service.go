@@ -30,7 +30,7 @@ func (s *Service) GetDuration() (Duration, error) {
 }
 
 func (s *Service)GetAllCustomers(startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
-    
+    log.Println("GetCachedCustomers called")
     var customers []Customer
     if selectedAllProfile == "1" {
         query := `SELECT Customer_code,
@@ -39,7 +39,7 @@ func (s *Service)GetAllCustomers(startDate, endDate string,selectedAllProfile st
                     MAX(Usage_segment) AS Usage_segment,
                     MAX(Age_range) AS Age_range,
                     MAX(Gender) AS Gender
-	            FROM pt_customer
+	            FROM pt_customer FORCE INDEX (idx_cus_code_cus_date_oc_cs_us_ar_gd)
 	            GROUP BY Customer_code;` // ดึงข้อมูลทั้งหมด
                 
         err := db.DB.Select(&customers, query) // ดึงข้อมูลทั้งหมดใส่ slice
@@ -54,7 +54,8 @@ func (s *Service)GetAllCustomers(startDate, endDate string,selectedAllProfile st
                     MAX(Usage_segment) AS Usage_segment,
                     MAX(Age_range) AS Age_range,
                     MAX(Gender) AS Gender
-	            FROM pt_customer where Customer_date between ? and ?
+	            FROM pt_customer FORCE INDEX (idx_cus_code_cus_date_oc_cs_us_ar_gd)
+                where Customer_date between ? and ?
 	            GROUP BY Customer_code;` // ดึงข้อมูลทั้งหมด
 
         err := db.DB.Select(&customers, query, startDate, endDate) // ดึงข้อมูลทั้งหมดใส่ slice
@@ -63,15 +64,20 @@ func (s *Service)GetAllCustomers(startDate, endDate string,selectedAllProfile st
             return nil, err
         }
     }
+    log.Println("Customers fetched successfully")
 	return customers, nil
 }
 func (s *Service)GetAllInvitation(startDate, endDate string,dateType string,selected1InvPProfile string)([]Invitation,error)  {
     // Choose the correct date column based on dateType
+    log.Println("GetCachedInvitations called")
     var dateColumn string
+    var index string
     if dateType == "invitationDate" {
         dateColumn = "IN_date"
+        index = "idx_edr_id_in_date_wallet_type"
     } else {
        dateColumn = "T_date"
+       index = "idx_edr_id_t_date_wallet_type"
     }
     var grpb string
     var Wallet_type string
@@ -83,16 +89,17 @@ func (s *Service)GetAllInvitation(startDate, endDate string,dateType string,sele
         Wallet_type = "Wallet_type"
     }
     query := fmt.Sprintf(`SELECT EDR_id, %s
-                            FROM pt_invitation 
+                            FROM pt_invitation FORCE INDEX (%s)
                             WHERE %s BETWEEN ? AND ?
-                            %s`, Wallet_type,dateColumn,grpb)
+                            %s`, Wallet_type,index,dateColumn,grpb)
     var invitation []Invitation
     err := db.DB.Select(&invitation,query, startDate, endDate)
     if err != nil {
         log.Printf("Error fetching invitation: %v", err)
 		return nil, err
     }
-    return invitation,err
+    log.Println("Invitation fetched successfully")
+    return invitation,nil
 }
 func (s *Service)PreloadCustomers(startDate, endDate string) ([]Customer, error) {
     
