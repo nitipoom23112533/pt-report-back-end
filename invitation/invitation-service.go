@@ -28,6 +28,34 @@ func (s *Service) GetDuration() (Duration, error) {
 
     return du, nil
 }
+// func (s *Service) CreateIndex() error {
+//     log.Println("Start create index.")
+// 	query := `
+// 		CREATE INDEX idx_cus_code_cus_date_oc_cs_us_ar_gd
+//             ON pt_customer (
+//             Customer_code,
+//             Customer_date,
+//             Occupation,
+//             Customer_segment,
+//             Usage_segment,
+//             Age_range,
+//             Gender
+//             );`
+//     // query := `
+// 	// 	CREATE INDEX idx_in_date_edr_id
+//     //         ON pt_invitation (
+//     //         IN_date,
+//     //         EDR_id
+//     //         );`
+// 	_, err := db.DB.Exec(query)
+// 	if err != nil {
+// 		log.Printf("Error creating index: %v", err)
+// 		return err
+// 	}
+// 	log.Println("Index created successfully.")
+
+// 	return nil
+// }
 
 func (s *Service)GetAllCustomers(startDate, endDate string,selectedAllProfile string) ([]Customer, error) {
     log.Println("GetCachedCustomers called")
@@ -248,7 +276,7 @@ func (s *Service) GetCachedCustomers(startDate string, endDate string,selectedAl
 }
 
 
-func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation) (CountOccupation,Wallet_type) {
+func (s *Service)FilterCustomers(customers []Customer, ptData []Invitation,typeData string) (CountOccupation,Wallet_type) {
 	var countOccupation CountOccupation
     var countWallet_type Wallet_type
 	// สร้าง map เพื่อเก็บ Customer_code -> Usage_segment
@@ -256,10 +284,16 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
 	for _, c := range customers {
 		customerMap[c.CustomerCode] = c
 	}
+    
 	// วนลูป invitations และตรวจสอบว่ามี Customer_code ตรงกันหรือไม่
-	for _, inv := range invitations {
-		customerAll, exists := customerMap[inv.EDR_id]
-
+	for _, inv := range ptData {
+        var key string
+        if typeData == "invitation" {
+            key = inv.EDR_id
+        } else {
+            key = inv.Customer_code
+        }
+		customerAll, exists := customerMap[key]
 		if exists {
 			// ถ้ามี ให้คำนวณ count ตาม Usage_segment
 			switch customerAll.Usage_segment {
@@ -293,6 +327,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18L++
                 case "PT19":
                     countWallet_type.PT19L++
+                case "PT20":
+                    countWallet_type.PT20L++
+                case "PT21":
+                    countWallet_type.PT21L++
                 }
 
 			case "2) Medium":
@@ -325,6 +363,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18M++
                 case "PT19":
                     countWallet_type.PT19M++
+                case "PT20":
+                    countWallet_type.PT20M++
+                case "PT21":
+                    countWallet_type.PT21M++
                 }
 			case "3) High":
 				countOccupation.High++
@@ -356,6 +398,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18H++
                 case "PT19":
                     countWallet_type.PT19H++
+                case "PT20":
+                    countWallet_type.PT20H++
+                case "PT21":
+                    countWallet_type.PT21H++
                 }
 			case "4) Login Only":
 				countOccupation.Login_Only++
@@ -387,6 +433,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18LO++
                 case "PT19":
                     countWallet_type.PT19LO++
+                case "PT20":
+                    countWallet_type.PT20LO++
+                case "PT21":
+                    countWallet_type.PT21LO++
                 }
             case "5) Screen View Only (No Login)":
                 countOccupation.Screen_View_Only++
@@ -417,6 +467,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18SVO++
                 case "PT19":
                     countWallet_type.PT19SVO++
+                case "PT20":
+                    countWallet_type.PT20SVO++
+                case "PT21":
+                    countWallet_type.PT21SVO++
                 }
 
             case "6) Inactive":
@@ -448,6 +502,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18I++
                 case "PT19":
                     countWallet_type.PT19I++
+                case "PT20":
+                    countWallet_type.PT20I++
+                case "PT21":
+                    countWallet_type.PT21I++
                 }
             case "7) New User":
                 countOccupation.New_User++
@@ -478,6 +536,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18NU++
                 case "PT19":
                     countWallet_type.PT19NU++
+                case "PT20":
+                    countWallet_type.PT20NU++
+                case "PT21":
+                    countWallet_type.PT21NU++
                 }
 			default:
 				countOccupation.NULL_Usage_segment++
@@ -508,6 +570,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18NULL++
                 case "PT19":
                     countWallet_type.PT19NULL++
+                case "PT20":
+                    countWallet_type.PT20NULL++
+                case "PT21":
+                    countWallet_type.PT21NULL++
                 }
 			}
             // Gender
@@ -541,6 +607,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Female++
                 case "PT19":
                     countWallet_type.PT19Female++
+                case "PT20":
+                    countWallet_type.PT20Female++
+                case "PT21":
+                    countWallet_type.PT21Female++
                 }
             case "M":
                 countOccupation.Gender_M++
@@ -571,6 +641,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Male++
                 case "PT19":
                     countWallet_type.PT19Male++
+                case "PT20":
+                    countWallet_type.PT20Male++
+                case "PT21":
+                    countWallet_type.PT21Male++
                 }
             default:
                 countOccupation.NULL_Gender++
@@ -601,6 +675,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18GNULL++
                 case "PT19":
                     countWallet_type.PT19GNULL++
+                case "PT20":
+                    countWallet_type.PT20GNULL++
+                case "PT21":
+                    countWallet_type.PT21GNULL++
                 }
             }
             // age range
@@ -634,6 +712,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age1++
                 case "PT19":
                     countWallet_type.PT19Age1++
+                case "PT20":
+                    countWallet_type.PT20Age1++
+                case "PT21":
+                    countWallet_type.PT21Age1++
                 }
             case "02] 22 - 25":
                 countOccupation.Age_range_2++
@@ -664,6 +746,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age2++
                 case "PT19":
                     countWallet_type.PT19Age2++
+                case "PT20":
+                    countWallet_type.PT20Age2++
+                case "PT21":
+                    countWallet_type.PT21Age2++
                 }
             case "03] 26  - 30":
                 countOccupation.Age_range_3++
@@ -694,6 +780,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age3++
                 case "PT19":
                     countWallet_type.PT19Age3++
+                case "PT20":
+                    countWallet_type.PT20Age3++
+                case "PT21":
+                    countWallet_type.PT21Age3++
                 }
             case "04] 31 - 40":
                 countOccupation.Age_range_4++
@@ -724,6 +814,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age4++
                 case "PT19":
                     countWallet_type.PT19Age4++
+                case "PT20":
+                    countWallet_type.PT20Age4++
+                case "PT21":
+                    countWallet_type.PT21Age4++
                 }
             case "05] 41 - 45":
                 countOccupation.Age_range_5++
@@ -754,6 +848,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age5++
                 case "PT19":
                     countWallet_type.PT19Age5++
+                case "PT20":
+                    countWallet_type.PT20Age5++
+                case "PT21":
+                    countWallet_type.PT21Age5++
                 }
             case "06] 46 - 50":
                 countOccupation.Age_range_6++
@@ -784,6 +882,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age6++
                 case "PT19":
                     countWallet_type.PT19Age6++
+                case "PT20":
+                    countWallet_type.PT20Age6++
+                case "PT21":
+                    countWallet_type.PT21Age6++
                 }
             case "07] 51 - 60":
                 countOccupation.Age_range_7++
@@ -814,6 +916,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age7++
                 case "PT19":
                     countWallet_type.PT19Age7++
+                case "PT20":
+                    countWallet_type.PT20Age7++
+                case "PT21":
+                    countWallet_type.PT21Age7++
                 }
             case "08] มากกว่า 60 ปี":
                 countOccupation.Age_range_8++
@@ -844,6 +950,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Age8++
                 case "PT19":
                     countWallet_type.PT19Age8++
+                case "PT20":
+                    countWallet_type.PT20Age8++
+                case "PT21":
+                    countWallet_type.PT21Age8++
                 }
             default:
                 countOccupation.NULL_Age_range++
@@ -874,6 +984,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18AgeNULL++
                 case "PT19":
                     countWallet_type.PT19AgeNULL++
+                case "PT20":
+                    countWallet_type.PT20AgeNULL++
+                case "PT21":
+                    countWallet_type.PT21AgeNULL++
                 }
             }
             // CUstomer Segment
@@ -907,6 +1021,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS02++
                 case "PT19":
                     countWallet_type.PT19CS02++
+                case "PT20":
+                    countWallet_type.PT20CS02++
+                case "PT21":
+                    countWallet_type.PT21CS02++
                 }
             case "03_PRECIOUS":
                 countOccupation.PRECIOUS++
@@ -937,6 +1055,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS03++
                 case "PT19":
                     countWallet_type.PT19CS03++
+                case "PT20":
+                    countWallet_type.PT20CS03++
+                case "PT21":
+                    countWallet_type.PT21CS03++
                 }
             case "04_PREWEALTH":
                 countOccupation.PREWEALTH++
@@ -967,6 +1089,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS04++
                 case "PT19":
                     countWallet_type.PT19CS04++
+                case "PT20":
+                    countWallet_type.PT20CS04++
+                case "PT21":
+                    countWallet_type.PT21CS04++
                 }
             case "05_AFFUIENTTOBE":
                 countOccupation.AFFUIENTTOBE++
@@ -997,6 +1123,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS05++
                 case "PT19":
                     countWallet_type.PT19CS05++
+                case "PT20":
+                    countWallet_type.PT20CS05++
+                case "PT21":
+                    countWallet_type.PT21CS05++
                 }
             case "06_RETIREPLANNER":
                 countOccupation.RETIREPLANNER++
@@ -1027,6 +1157,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS06++
                 case "PT19":
                     countWallet_type.PT19CS06++
+                case "PT20":
+                    countWallet_type.PT20CS06++
+                case "PT21":
+                    countWallet_type.PT21CS06++
                 }
             case "07_BUILDUPFORFEATURE":
                 countOccupation.BUILDUPFORFEATURE++
@@ -1057,6 +1191,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS07++
                 case "PT19":
                     countWallet_type.PT19CS07++
+                case "PT20":
+                    countWallet_type.PT20CS07++
+                case "PT21":
+                    countWallet_type.PT21CS07++
                 }
             case "08_FAMILYFOCUS":
                 countOccupation.FAMILYFOCUS++
@@ -1087,6 +1225,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS08++
                 case "PT19":
                     countWallet_type.PT19CS08++
+                case "PT20":
+                    countWallet_type.PT20CS08++
+                case "PT21":
+                    countWallet_type.PT21CS08++
                 }
             case "09_EARLYINCAREER":
                 countOccupation.EARLYINCAREER++
@@ -1117,6 +1259,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS09++
                 case "PT19":
                     countWallet_type.PT19CS09++
+                case "PT20":
+                    countWallet_type.PT20CS09++
+                case "PT21":
+                    countWallet_type.PT21CS09++
                 }
             case "10_LOWERMASS":
                 countOccupation.LOWERMASS++
@@ -1147,6 +1293,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS10++
                 case "PT19":
                     countWallet_type.PT19CS10++
+                case "PT20":
+                    countWallet_type.PT20CS10++
+                case "PT21":
+                    countWallet_type.PT21CS10++
                 }
             case "11_STUDENT":
                 countOccupation.STUDENT++
@@ -1177,6 +1327,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS11++
                 case "PT19":
                     countWallet_type.PT19CS11++
+                case "PT20":
+                    countWallet_type.PT20CS11++
+                case "PT21":
+                    countWallet_type.PT21CS11++
                 }
             case "12_RETIREHIGHWEALTH":
                 countOccupation.RETIREHIGHWEALTH++
@@ -1207,6 +1361,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS12++
                 case "PT19":
                     countWallet_type.PT19CS12++
+                case "PT20":
+                    countWallet_type.PT20CS12++
+                case "PT21":
+                    countWallet_type.PT21CS12++
                 }
             case "13_RETIREMEDIUMWEALTH":
                 countOccupation.RETIREMEDIUMWEALTH++
@@ -1237,6 +1395,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS13++
                 case "PT19":
                     countWallet_type.PT19CS13++
+                case "PT20":
+                    countWallet_type.PT20CS13++
+                case "PT21":
+                    countWallet_type.PT21CS13++
                 }
             case "14_RETIRELOWWEALTH":
                 countOccupation.RETIRELOWWEALTH++
@@ -1267,6 +1429,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS14++
                 case "PT19":
                     countWallet_type.PT19CS14++
+                case "PT20":
+                    countWallet_type.PT20CS14++
+                case "PT21":
+                    countWallet_type.PT21CS14++
                 }
             case "18_NEWCUST3MTH":
                 countOccupation.NEWCUST3MTH++
@@ -1297,6 +1463,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS18++
                 case "PT19":
                     countWallet_type.PT19CS18++
+                case "PT20":
+                    countWallet_type.PT20CS18++
+                case "PT21":
+                    countWallet_type.PT21CS18++
                 }
             case "99_OTH":
                 countOccupation.OTH++
@@ -1327,6 +1497,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS99++
                 case "PT19":
                     countWallet_type.PT19CS99++
+                case "PT20":
+                    countWallet_type.PT20CS99++
+                case "PT21":
+                    countWallet_type.PT21CS99++
                 }
             case "Career Starter - Lower":
                 countOccupation.OTH++
@@ -1357,6 +1531,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CSL++
                 case "PT19":
                     countWallet_type.PT19CSL++
+                case "PT20":
+                    countWallet_type.PT20CSL++
+                case "PT21":
+                    countWallet_type.PT21CSL++
                 }
             case "Career Starter - Middle":
                 countOccupation.OTH++
@@ -1387,6 +1565,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CSM++
                 case "PT19":
                     countWallet_type.PT19CSM++
+                case "PT20":
+                    countWallet_type.PT20CSM++
+                case "PT21":
+                    countWallet_type.PT21CSM++
                 }
             case "Career Starter - Upper":
                 countOccupation.OTH++
@@ -1417,6 +1599,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CSU++
                 case "PT19":
                     countWallet_type.PT19CSU++
+                case "PT20":
+                    countWallet_type.PT20CSU++
+                case "PT21":
+                    countWallet_type.PT21CSU++
                 }
             case "Children/Student":
                 countOccupation.OTH++
@@ -1447,6 +1633,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CS++
                 case "PT19":
                     countWallet_type.PT19CS++
+                case "PT20":
+                    countWallet_type.PT20CS++
+                case "PT21":
+                    countWallet_type.PT21CS++
                 }
             case "Future Builder":
                 countOccupation.OTH++
@@ -1477,6 +1667,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18FB++
                 case "PT19":
                     countWallet_type.PT19FB++
+                case "PT20":
+                    countWallet_type.PT20FB++
+                case "PT21":
+                    countWallet_type.PT21FB++
                 }
             case "Lower Mass":
                 countOccupation.OTH++
@@ -1507,6 +1701,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18LM++
                 case "PT19":
                     countWallet_type.PT19LM++
+                case "PT20":
+                    countWallet_type.PT20LM++
+                case "PT21":
+                    countWallet_type.PT21LM++
                 }
             case "Mass - Lower":
                 countOccupation.OTH++
@@ -1537,6 +1735,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18ML++
                 case "PT19":
                     countWallet_type.PT19ML++
+                case "PT20":
+                    countWallet_type.PT20ML++
+                case "PT21":
+                    countWallet_type.PT21ML++
                 }
             case "Mass - Middle":
                 countOccupation.OTH++
@@ -1567,6 +1769,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18MM++
                 case "PT19":
                     countWallet_type.PT19MM++
+                case "PT20":
+                    countWallet_type.PT20MM++
+                case "PT21":
+                    countWallet_type.PT21MM++
                 }
             case "Mass - Upper":
                 countOccupation.OTH++
@@ -1597,6 +1803,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18MU++
                 case "PT19":
                     countWallet_type.PT19MU++
+                case "PT20":
+                    countWallet_type.PT20MU++
+                case "PT21":
+                    countWallet_type.PT21MU++
                 }
             case "Pre-Senior":
                 countOccupation.OTH++
@@ -1627,6 +1837,9 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18PS++
                 case "PT19":
                     countWallet_type.PT19PS++
+                case "PT20":
+                    countWallet_type.PT20PS++
+                case "PT21":
                 }
             case "Senior - Lower":
                 countOccupation.OTH++
@@ -1657,6 +1870,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18SL++
                 case "PT19":
                     countWallet_type.PT19SL++
+                case "PT20":
+                    countWallet_type.PT20SL++
+                case "PT21":
+                    countWallet_type.PT21SL++
                 }
             case "Senior - Upper":
                 countOccupation.OTH++
@@ -1687,6 +1904,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18SU++
                 case "PT19":
                     countWallet_type.PT19SU++
+                case "PT20":
+                    countWallet_type.PT20SU++
+                case "PT21":
+                    countWallet_type.PT21SU++
                 }
             case "University Student":
                 countOccupation.OTH++
@@ -1717,6 +1938,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18US++
                 case "PT19":
                     countWallet_type.PT19US++
+                case "PT20":
+                    countWallet_type.PT20US++
+                case "PT21":
+                    countWallet_type.PT21US++
                 }
             case "Wealth-to-be":
                 countOccupation.OTH++
@@ -1747,6 +1972,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18WTB++
                 case "PT19":
                     countWallet_type.PT19WTB++
+                case "PT20":
+                    countWallet_type.PT20WTB++
+                case "PT21":
+                    countWallet_type.PT21WTB++
                 }
             case "Wealth Potentail":
                 countOccupation.OTH++
@@ -1777,6 +2006,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18WP++
                 case "PT19":
                     countWallet_type.PT19WP++
+                case "PT20":
+                    countWallet_type.PT20WP++
+                case "PT21":
+                    countWallet_type.PT21WP++
                 }
             case "Wealth":
                 countOccupation.OTH++
@@ -1807,6 +2040,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18W++
                 case "PT19":
                     countWallet_type.PT19W++
+                case "PT20":
+                    countWallet_type.PT20W++
+                case "PT21":
+                    countWallet_type.PT21W++
                 }
             default:
                 countOccupation.NULL_Custmer_segment++
@@ -1837,6 +2074,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18CSNULL++
                 case "PT19":
                     countWallet_type.PT19CSNULL++
+                case "PT20":
+                    countWallet_type.PT20CSNULL++
+                case "PT21":
+                    countWallet_type.PT21CSNULL++
                 }
             }
             // Occupation
@@ -1870,6 +2111,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18GOV++
                 case "PT19":
                     countWallet_type.PT19GOV++
+                case "PT20":
+                    countWallet_type.PT20GOV++
+                case "PT21":
+                    countWallet_type.PT21GOV++
                 }
             case "Mass-Unidentify":
                 countOccupation.Mass_Unidentify++
@@ -1900,6 +2145,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Mass++
                 case "PT19":
                     countWallet_type.PT19Mass++
+                case "PT20":
+                    countWallet_type.PT20Mass++
+                case "PT21":
+                    countWallet_type.PT21Mass++
                 }
             case "N/A":
                 countOccupation.NA++
@@ -1930,6 +2179,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18NA++
                 case "PT19":
                     countWallet_type.PT19NA++
+                case "PT20":
+                    countWallet_type.PT20NA++
+                case "PT21":
+                    countWallet_type.PT21NA++
                 }
             case "Salary":
                 countOccupation.Salary++
@@ -1960,6 +2213,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Salary++
                 case "PT19":
                     countWallet_type.PT19Salary++
+                case "PT20":
+                    countWallet_type.PT20Salary++
+                case "PT21":
+                    countWallet_type.PT21Salary++
                 }
             case "Self Employ (sSME)":
                 countOccupation.Self_Employ++
@@ -1990,6 +2247,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18SE++
                 case "PT19":
                     countWallet_type.PT19SE++
+                case "PT20":
+                    countWallet_type.PT20SE++
+                case "PT21":
+                    countWallet_type.PT21SE++
                 }
             case "Student":
                 countOccupation.Student++
@@ -2020,6 +2281,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18STD++
                 case "PT19":
                     countWallet_type.PT19STD++
+                case "PT20":
+                    countWallet_type.PT20STD++
+                case "PT21":
+                    countWallet_type.PT21STD++
                 }
             case "Wealth":
                 countOccupation.Wealth++
@@ -2050,6 +2315,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Wealth++
                 case "PT19":
                     countWallet_type.PT19Wealth++
+                case "PT20":
+                    countWallet_type.PT20Wealth++
+                case "PT21":
+                    countWallet_type.PT21Wealth++
                 }
             case "Welfare":
                 countOccupation.Welfare++
@@ -2080,6 +2349,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18Welfare++
                 case "PT19":
                     countWallet_type.PT19Welfare++
+                case "PT20":
+                    countWallet_type.PT20Welfare++
+                case "PT21":
+                    countWallet_type.PT21Welfare++
                 }
             default:
                 countOccupation.NULL_Occupation++
@@ -2110,6 +2383,10 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                     countWallet_type.PT18OCNULL++
                 case "PT19":
                     countWallet_type.PT19OCNULL++
+                case "PT20":
+                    countWallet_type.PT20OCNULL++
+                case "PT21":
+                    countWallet_type.PT21OCNULL++
                 }
             }
 		}  else {
@@ -2197,6 +2474,18 @@ func (s *Service)FilterCustomers(customers []Customer, invitations []Invitation)
                 countWallet_type.PT19AgeNULL++
                 countWallet_type.PT19CSNULL++
                 countWallet_type.PT19OCNULL++
+            case "PT20":
+                countWallet_type.PT20NULL++
+                countWallet_type.PT20GNULL++
+                countWallet_type.PT20AgeNULL++
+                countWallet_type.PT20CSNULL++
+                countWallet_type.PT20OCNULL++
+            case "PT21":
+                countWallet_type.PT21NULL++
+                countWallet_type.PT21GNULL++
+                countWallet_type.PT21AgeNULL++
+                countWallet_type.PT21CSNULL++
+                countWallet_type.PT21OCNULL++
             }
 		}
 

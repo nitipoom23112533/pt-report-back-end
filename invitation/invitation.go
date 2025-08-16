@@ -5,6 +5,7 @@ import(
 )
 type Invitation struct {
 	EDR_id      string `db:"EDR_id"`
+	Customer_code 	string `db:"Customer_code"`
 	Wallet_type string `db:"Wallet_type"`
 	IN_date     string `db:"IN_date"`
 	T_date      string `db:"T_date"`

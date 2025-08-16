@@ -46,7 +46,7 @@ func (r *InvitationRoute) sendinvitation(c echo.Context) error {
 
 	}
 
-	occupationCount, walletTypeCount := r.InvitationService.FilterCustomers(customer, invitations)
+	occupationCount, walletTypeCount := r.InvitationService.FilterCustomers(customer, invitations,"invitation")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"occupation":  occupationCount,

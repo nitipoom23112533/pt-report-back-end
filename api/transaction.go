@@ -47,7 +47,9 @@ func (r *TransactionRoute)sendTransaction(c echo.Context) error {
 	}
 
 	// ประมวลผลข้อมูล
-	occupationCount, walletTypeCount := r.TransactionService.FilterCustomers(customer, transactions)
+	// occupationCount, walletTypeCount := r.TransactionService.FilterCustomers(customer, transactions)
+	occupationCount, walletTypeCount := r.InvitationService.FilterCustomers(customer, transactions,"transaction")
+
 
 	// ส่ง response กลับ
 	return c.JSON(http.StatusOK, map[string]interface{}{

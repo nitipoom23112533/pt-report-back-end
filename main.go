@@ -26,6 +26,10 @@ func main() {
 
 	invitationService := invitation.NewService()
 	transactionService := transaction.NewService()
+	// err = invitationService.CreateIndex()
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
 	// datedu,err := invitationService.GetDuration()
 	// if err != nil {
@@ -60,13 +64,13 @@ func main() {
 	e.OPTIONS("/*", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
-	// e.Use(middleware.CORS())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodOptions},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
-	}))
+	e.Use(middleware.CORS())
+	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	// 	AllowOrigins:     []string{"https://pt-report-fcccf.web.app"},
+	// 	AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+	// 	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	// 	AllowCredentials: true,
+	// }))
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	apiClient := api.NewAPI(invitationService,transactionService)
