@@ -6,6 +6,7 @@ import (
 	"pt-report-backend/db"
 	"pt-report-backend/invitation"
 	"pt-report-backend/transaction"
+	"pt-report-backend/survey"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -26,6 +27,8 @@ func main() {
 
 	invitationService := invitation.NewService()
 	transactionService := transaction.NewService()
+	surveyService := survey.NewSurveyService()
+
 	// err = invitationService.CreateIndex()
 	// if err != nil {
 	// 	log.Fatalln(err)
@@ -73,7 +76,7 @@ func main() {
 	// }))
 	e.Pre(middleware.RemoveTrailingSlash())
 
-	apiClient := api.NewAPI(invitationService,transactionService)
+	apiClient := api.NewAPI(invitationService,transactionService,surveyService)
 	apiClient.Group(e.Group(""))
 
 	// เริ่มเซิร์ฟเวอร์
