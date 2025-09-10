@@ -34,11 +34,16 @@ func NewAPI(invitationService *invitation.Service, transactionService *transacti
 }
 
 func (api *API) Group(g *echo.Group)  {
-	ptReportGroup := g.Group("pt-report")
+	// ptReportGroup := g.Group("pt-report")
+	ptReportGroup := g.Group("/pt-report")
+
+	ptReportPublic := g.Group("/pt-report")
+
 	api.InvitationRoute.Group(ptReportGroup)
 	api.TransactionRoute.Group(ptReportGroup)
 	api.SurveyRoute.Group(ptReportGroup)
-	api.SurveyResRoute.Group(ptReportGroup)
+
+	api.SurveyResRoute.Group(ptReportPublic)
 
 }
 
