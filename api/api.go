@@ -4,7 +4,7 @@ import (
 	"pt-report-backend/invitation"
 	"pt-report-backend/transaction"
 	"pt-report-backend/survey"
-
+	"pt-report-backend/survey-responses"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,9 +12,10 @@ type API struct {
 	InvitationRoute *InvitationRoute
 	TransactionRoute *TransactionRoute
 	SurveyRoute *SurveyRoute
+	SurveyResRoute *surveyResRoute
 }
 
-func NewAPI(invitationService *invitation.Service, transactionService *transaction.Service,surveyService *survey.SurveyService) *API {
+func NewAPI(invitationService *invitation.Service, transactionService *transaction.Service,surveyService *survey.SurveyService,SurveyResService *surveyresponses.SurveyResService) *API {
 	return &API{
 		InvitationRoute: &InvitationRoute{
 			InvitationService: invitationService,
@@ -26,7 +27,9 @@ func NewAPI(invitationService *invitation.Service, transactionService *transacti
 		SurveyRoute: &SurveyRoute{
 			SurveyService: surveyService,
 		},
-
+		SurveyResRoute: &surveyResRoute{
+			SurveyResService: SurveyResService,
+		},
 	}
 }
 
@@ -35,6 +38,7 @@ func (api *API) Group(g *echo.Group)  {
 	api.InvitationRoute.Group(ptReportGroup)
 	api.TransactionRoute.Group(ptReportGroup)
 	api.SurveyRoute.Group(ptReportGroup)
+	api.SurveyResRoute.Group(ptReportGroup)
 
 }
 
