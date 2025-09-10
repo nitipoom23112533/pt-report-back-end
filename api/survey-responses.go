@@ -34,11 +34,12 @@ func (r *surveyResRoute) getSurveyResponses(c echo.Context) error {
 		log.Println(err.Error())
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	err := r.SurveyResService.Responses(params.CustomerCode)
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
+	log.Println(params.CustomerCode)
+	// err := r.SurveyResService.Responses(params.CustomerCode)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(http.StatusInternalServerError, err.Error())
+	// }
 	 
 	return c.JSON(http.StatusOK, nil)
 }
