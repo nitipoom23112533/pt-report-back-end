@@ -2,7 +2,7 @@ package api
 
 import (
 	"log"
-	"pt-report-backend/auth"
+	// "pt-report-backend/auth"
 	"pt-report-backend/survey"
 
 	"github.com/labstack/echo/v4"
@@ -16,7 +16,7 @@ type SurveyRoute struct{
 }
 
 func (r *SurveyRoute)Group(g *echo.Group)  {
-	g.Use(auth.Auth())
+	// g.Use(auth.Auth())
 	g.GET( "/surveyDb", r.getSurveyDb)
 	g.PATCH("/updatesurveyDb", r.updateSurveyDb)
 }

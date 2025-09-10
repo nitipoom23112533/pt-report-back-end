@@ -6,6 +6,7 @@ import (
 	"pt-report-backend/survey"
 	"pt-report-backend/survey-responses"
 	"github.com/labstack/echo/v4"
+	"pt-report-backend/auth"
 )
 
 type API struct {
@@ -36,13 +37,12 @@ func NewAPI(invitationService *invitation.Service, transactionService *transacti
 func (api *API) Group(g *echo.Group)  {
 	// ptReportGroup := g.Group("pt-report")
 	ptReportGroup := g.Group("/pt-report")
-
-	ptReportPublic := g.Group("/pt-report")
-
+	ptReportGroup.Use(auth.Auth()) // echojwt ของคุณ
 	api.InvitationRoute.Group(ptReportGroup)
 	api.TransactionRoute.Group(ptReportGroup)
 	api.SurveyRoute.Group(ptReportGroup)
 
+	ptReportPublic := g.Group("/pt-report")
 	api.SurveyResRoute.Group(ptReportPublic)
 
 }

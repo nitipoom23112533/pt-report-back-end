@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"pt-report-backend/invitation"
 	"github.com/labstack/echo/v4"
-	"pt-report-backend/auth"
+	// "pt-report-backend/auth"
 
 )
 
@@ -12,7 +12,7 @@ type InvitationRoute struct {
 	InvitationService *invitation.Service
 }
 func (r *InvitationRoute) Group (g *echo.Group)  {
-	g.Use(auth.Auth())
+	// g.Use(auth.Auth())
 	g.GET("/invitation", r.sendinvitation)
 }
 

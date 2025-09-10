@@ -2,7 +2,7 @@ package api
 
 import (
 	"net/http"
-	"pt-report-backend/auth"
+	// "pt-report-backend/auth"
 	"pt-report-backend/invitation"
 	"pt-report-backend/transaction"
 
@@ -16,7 +16,7 @@ type TransactionRoute struct {
 }
 
 func (r *TransactionRoute)Group(g *echo.Group)  {
-	g.Use(auth.Auth())
+	// g.Use(auth.Auth())
 	g.GET( "/transaction", r.sendTransaction)
 }
 
