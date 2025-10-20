@@ -16,10 +16,10 @@ import (
 func main() {
 
 	err := db.InitDB(db.Config{
-		Username:     "pt-report",
-		Password:     "6EuFmuTj3d83hgQ/",
-		Server:       "35.186.157.84",
-		DatabaseName: "pt_record",
+		Username:     "Username",
+		Password:     "Password",
+		Server:       "Server",
+		DatabaseName: "DatabaseName",
 	})
 	if err != nil {
 		log.Fatalln(err)
